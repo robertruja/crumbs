@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Crumb
 public @interface HandlerRoot {
-    String value() default "";
+    String value() default "/";
 }

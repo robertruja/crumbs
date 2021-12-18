@@ -24,8 +24,7 @@ public class CrumbsContext {
         LOGGER.info("Starting Crumbs Context ...");
         long start = System.currentTimeMillis();
         properties = ConfigLoader.loadProperties();
-        loadCrumbs("org.crumbs");
-        loadCrumbs(clazz);
+        loadCrumbs("org.crumbs", clazz.getPackage().getName());
         injectReferences();
         if (properties != null) {
             injectProperties();
@@ -155,21 +154,17 @@ public class CrumbsContext {
         });
     }
 
-    private void loadCrumbs(Class<?> clazz) throws Exception {
-        String packageName = clazz.getPackage().getName();
-        loadCrumbs(packageName);
-    }
-
-    private void loadCrumbs(String packageName) throws Exception {
+    private void loadCrumbs(String... packageNames) throws Exception {
         Set<Class<?>> instantiable;
         try {
-            List<Class<?>> scannedClasses = Scanner.getClassesInPackage(packageName);
+            List<Class<?>> scannedClasses = new ArrayList<>();
+            for (String name : packageNames) {
+                scannedClasses.addAll(Scanner.getClassesInPackage(name));
+            }
 
-
-            Set<Class<?>> annotatedClasses = scannedClasses.stream()
-                    .filter(scannedClazz -> Arrays.stream(scannedClazz.getAnnotations())
-                            .anyMatch(annotation -> annotation.annotationType().equals(Crumb.class)))
-                    .collect(Collectors.toSet());
+            List<Class<?>> annotatedClasses = scannedClasses.stream()
+                    .filter(scannedClazz -> scannedClazz.getAnnotation(Crumb.class) != null)
+                    .collect(Collectors.toList());
 
             instantiable = new HashSet<>();
             Set<Class<?>> interfaces = new HashSet<>();

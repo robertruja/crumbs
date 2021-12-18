@@ -7,9 +7,7 @@ import org.crumbs.mvc.common.model.HttpStatus;
 import org.crumbs.mvc.common.model.Mime;
 import org.crumbs.mvc.context.HandlerContext;
 import org.crumbs.mvc.context.HandlerInvocationResult;
-import org.crumbs.mvc.exception.HandlerInvocationException;
-import org.crumbs.mvc.exception.HandlerNotFoundException;
-import org.crumbs.mvc.exception.HttpMethodNotAllowedException;
+import org.crumbs.mvc.exception.*;
 import org.crumbs.mvc.model.ResponseEntity;
 
 public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
@@ -28,21 +26,21 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
         long start = System.currentTimeMillis();
 
         try {
-            if(!handlerContext.intercept(request, response)) {
+            if (!handlerContext.intercept(request, response)) {
                 return;
             }
             HandlerInvocationResult result = handlerContext.invokeHandler(request);
 
             HttpStatus status;
             Object body;
-            if(result.getReturnType().equals(String.class)) {
+            if (result.getReturnType().equals(String.class)) {
                 status = HttpStatus.OK;
                 body = result.getContent();
-            } else if(result.getReturnType().equals(ResponseEntity.class)) {
-                ResponseEntity<?> responseEntity = (ResponseEntity<?>)result.getContent();
+            } else if (result.getReturnType().equals(ResponseEntity.class)) {
+                ResponseEntity<?> responseEntity = (ResponseEntity<?>) result.getContent();
                 status = responseEntity.getStatus();
                 body = jsonMapper.marshal(responseEntity.getBody());
-            } else if(result.getReturnType() == null){
+            } else if (result.getReturnType() == null) {
                 status = HttpStatus.NO_CONTENT;
                 body = null;
             } else {
@@ -52,7 +50,36 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
             response.setStatus(status);
             response.setMime(result.getMime());
             response.setBody(body == null ? new byte[]{} : body.toString().getBytes());
-
+        } catch (BadRequestException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.BAD_REQUEST);
+            response.setMime(Mime.TEXT_PLAIN);
+            response.setBody(e.getMessage().getBytes());
+        } catch (ConflictException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.CONFLICT);
+            response.setMime(Mime.TEXT_PLAIN);
+            response.setBody(e.getMessage().getBytes());
+        } catch (ForbiddenException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.FORBIDDEN);
+            response.setMime(Mime.TEXT_PLAIN);
+            response.setBody(e.getMessage().getBytes());
+        } catch (UnauthorizedException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setMime(Mime.TEXT_PLAIN);
+            response.setBody(e.getMessage().getBytes());
+        } catch (NotFoundException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setMime(Mime.TEXT_PLAIN);
+            response.setBody(e.getMessage().getBytes());
+        } catch (InternalServerErrorException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setMime(Mime.TEXT_PLAIN);
+            response.setBody(e.getMessage().getBytes());
         } catch (HandlerNotFoundException ex) {
             logger.warn(ex.getMessage());
             response.setStatus(HttpStatus.NOT_FOUND);

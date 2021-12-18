@@ -14,18 +14,18 @@ import java.util.Map;
 @HandlerRoot("/test-handler")
 public class TestHandler {
 
-    @Handler(value = "/test-get", producesContent = Mime.TEXT_PLAIN)
+    @Handler(mapping = "/test-get", producesContent = Mime.TEXT_PLAIN)
     public String testGet() {
         return "hello from get";
     }
 
-    @Handler(value = "/test-post", method = HttpMethod.POST)
+    @Handler(mapping = "/test-post", method = HttpMethod.POST)
     public ResponseEntity<?> someRandomHandlerWithPost(@RequestBody SimpleRequestModel requestBody) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new SimpleResponseModel("Got name: " + requestBody.getName() + ", age: " + requestBody.getAge(), null, 0, null));
     }
 
-    @Handler(value = "/test-get", method = HttpMethod.PUT)
+    @Handler(mapping = "/test-get", method = HttpMethod.PUT)
     public ResponseEntity<?> somePutWithParamsAndBody(@RequestParam String stringParam, @RequestParam("theInt") Integer intParam,
 
                                                       @RequestBody Map<String, Object> someModel,
@@ -35,10 +35,15 @@ public class TestHandler {
                 .body(new SimpleResponseModel(stringParam, nullableLongParam, intParam, someModel));
     }
 
-    @Handler(value = "/test/{some-string}/test/{someInt}/some")
+    @Handler(mapping = "/test/{some-string}/test/{someInt}/some")
     public ResponseEntity<?> methodWithPathParams(@PathVariable("some-string") String stringParam, @PathVariable Integer someInt) {
         String response = "" + stringParam + " and " + someInt;
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new PathParamResponse(response));
+    }
+
+    @Handler(mapping = "/test/params")
+    public String primitiveParams(@RequestParam(required = true) int someParam) {
+        return "value is: " + someParam;
     }
 }

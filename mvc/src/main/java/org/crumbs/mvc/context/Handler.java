@@ -45,7 +45,7 @@ public class Handler {
                     org.crumbs.mvc.annotation.Handler annotation =
                             method.getAnnotation(org.crumbs.mvc.annotation.Handler.class);
 
-                    String subPath = annotation.value();
+                    String subPath = annotation.mapping();
                     HttpMethod httpMethod = annotation.method();
                     Mime mime = annotation.producesContent();
                     Handler handler = new Handler();
@@ -60,15 +60,23 @@ public class Handler {
         return handlers;
     }
 
-    public HandlerInvocationResult invoke(Request request) {
+    public HandlerInvocationResult invoke(Request request) throws Exception {
         try {
             Object[] parameters = getParameters(request);
             Object invocationResult = method.invoke(handlerRootInstance, parameters);
 
             return new HandlerInvocationResult(responseContentType, invocationResult,
                     method.getReturnType());
-        } catch (IllegalAccessException|InvocationTargetException e) {
+        } catch (IllegalAccessException e) {
             throw new HandlerInvocationException("Could not invoke handler method " + method, e);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if(cause instanceof Error) {
+                throw new HandlerInvocationException("Handler invocation threw error", e);
+            } else {
+                Exception exception = (Exception) e.getCause();
+                throw exception;
+            }
         }
     }
 
@@ -81,13 +89,10 @@ public class Handler {
                     }
                     annotation = parameter.getAnnotation(RequestParam.class);
                     if(annotation != null) {
-                        if(parameter.getType().isPrimitive()) {
-                            throw new CrumbsMVCInitException("Unsupported primitive type for parameter: " +
-                                    parameter.getName());
-                        }
                         RequestParam requestParamAnnotation = (RequestParam) annotation;
                         return new org.crumbs.mvc.context.RequestParam(
-                                requestParamAnnotation.value(), parameter.getName(), parameter.getType());
+                                requestParamAnnotation.value(), parameter.getName(), requestParamAnnotation.required(),
+                                parameter.getType());
                     }
                     annotation = parameter.getAnnotation(PathVariable.class);
                     if(annotation != null) {

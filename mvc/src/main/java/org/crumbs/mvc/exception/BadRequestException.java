@@ -1,0 +1,7 @@
+package org.crumbs.mvc.exception;
+
+public class BadRequestException extends RuntimeException {
+    public BadRequestException(String message) {
+        super(message);
+    }
+}

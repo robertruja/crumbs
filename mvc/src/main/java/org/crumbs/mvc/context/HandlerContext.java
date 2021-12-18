@@ -63,7 +63,7 @@ public class HandlerContext {
         return shouldContinue;
     }
 
-    public HandlerInvocationResult invokeHandler(Request request) {
+    public HandlerInvocationResult invokeHandler(Request request) throws Exception {
         Map<HttpMethod, Handler> httpMethodMapping = findPath(request);
         if(httpMethodMapping == null) {
             throw new HandlerNotFoundException("Could not find handler for resource: " + request.getUrlPath());
@@ -77,20 +77,19 @@ public class HandlerContext {
     }
 
     private Map<HttpMethod, Handler> findPath(Request request) {
-        for(String mapping: handlerMap.keySet()) {
+        mapping: for(String mapping: handlerMap.keySet()) {
             String[] subMappings = mapping.substring(1).split("/");
             String[] subPaths = request.getUrlPath().substring(1).split("/");
-            if(subMappings.length != subPaths.length) {
-                continue;
-            }
-            for (int i = 0; i < subMappings.length; i++) {
-                String subMapping = subMappings[i];
-                String subPath = subPaths[i];
-                if(!subMapping.equals(subPath)) {
-                    if(subMapping.startsWith("{") && subMapping.endsWith("}")) {
-                        request.setPathVariable(subMapping.substring(1, subMapping.length() -1), subPath);
-                    } else {
-                        break;
+            if(subMappings.length == subPaths.length) {
+                for (int i = 0; i < subMappings.length; i++) {
+                    String subMapping = subMappings[i];
+                    String subPath = subPaths[i];
+                    if(!subMapping.equals(subPath)) {
+                        if(subMapping.startsWith("{") && subMapping.endsWith("}")) {
+                            request.setPathVariable(subMapping.substring(1, subMapping.length() - 1), subPath);
+                        } else {
+                            continue mapping;
+                        }
                     }
                 }
             }
