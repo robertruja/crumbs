@@ -107,4 +107,45 @@ public class JDBCTests {
         assertEquals(15, res2.getAge());
         assertEquals(20, res3.getAge());
     }
+
+    @Test
+    public void shouldRetrieveSingleValue() {
+        CrumbsContext context = CrumbsApp.run(JDBCTests.class);
+        TestDao testDao = context.getCrumb(TestDao.class);
+
+        RowModel rowModel1 = RowModel.builder()
+                .id(1)
+                .name("first")
+                .age(10)
+                .eventTime(System.currentTimeMillis())
+                .build();
+
+        testDao.insertRow(rowModel1);
+
+        RowModel rowModel2 = RowModel.builder()
+                .id(2)
+                .name("second")
+                .age(15)
+                .eventTime(System.currentTimeMillis())
+                .build();
+
+        testDao.insertRow(rowModel2);
+
+
+        RowModel rowModel3 = RowModel.builder()
+                .id(3)
+                .name("third")
+                .age(20)
+                .eventTime(System.currentTimeMillis())
+                .build();
+
+        testDao.insertRow(rowModel3);
+
+        List<String> names = testDao.retrieveListOfColumns();
+
+        assertEquals(3, names.size());
+        assertTrue(names.contains("first"));
+        assertTrue(names.contains("second"));
+        assertTrue(names.contains("third"));
+    }
 }

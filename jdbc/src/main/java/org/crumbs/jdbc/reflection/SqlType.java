@@ -3,6 +3,7 @@ package org.crumbs.jdbc.reflection;
 import java.sql.Timestamp;
 
 public enum SqlType {
+    GENERIC,
     BOOLEAN,
     STRING,
     INTEGER,
@@ -28,6 +29,6 @@ public enum SqlType {
         } else if (clazz.equals(Timestamp.class)) {
             return TIMESTAMP;
         }
-        throw new IllegalArgumentException("Object of type " + clazz.getName() + " is not a basic sql type");
+        return GENERIC;
     }
 }

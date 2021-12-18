@@ -3,6 +3,7 @@ package org.crumbs.jdbc.manager;
 import org.crumbs.core.annotation.Crumb;
 import org.crumbs.core.annotation.CrumbRef;
 import org.crumbs.jdbc.connector.JdbcConnector;
+import org.crumbs.jdbc.exception.JdbcException;
 import org.crumbs.jdbc.model.BatchUpdateParameters;
 import org.crumbs.jdbc.model.JdbcBatchUpdate;
 import org.crumbs.jdbc.model.JdbcQuery;
@@ -70,58 +71,74 @@ public class JDBCManager {
         for (Object param : parameters) {
             switch (SqlType.fromClass(param.getClass())) {
                 case BOOLEAN:
-                    stmt.setBoolean(++i, (boolean) param); break;
+                    stmt.setBoolean(++i, (boolean) param);
+                    break;
                 case LONG:
-                    stmt.setLong(++i, (long) param); break;
+                    stmt.setLong(++i, (long) param);
+                    break;
                 case FLOAT:
-                    stmt.setFloat(++i, (float) param); break;
+                    stmt.setFloat(++i, (float) param);
+                    break;
                 case DOUBLE:
-                    stmt.setDouble(++i, (double) param); break;
+                    stmt.setDouble(++i, (double) param);
+                    break;
                 case INTEGER:
-                    stmt.setInt(++i, (int) param); break;
+                    stmt.setInt(++i, (int) param);
+                    break;
                 case STRING:
-                    stmt.setString(++i, (String) param); break;
+                    stmt.setString(++i, (String) param);
+                    break;
                 case TIMESTAMP:
-                    stmt.setTimestamp(++i, (Timestamp) param); break;
+                    stmt.setTimestamp(++i, (Timestamp) param);
+                    break;
+                default:
+                    throw new JdbcException("Cannot map parameter from generic type " + param.getClass());
             }
         }
     }
 
     private <T> T mapRow(Class<T> type, ResultSet rs) throws SQLException {
+
+        SqlType sqlType = SqlType.fromClass(type);
         try {
-            T instance = type.getConstructor().newInstance();
-            int i = 0;
-            Field[] fields = type.getDeclaredFields();
-            for(Field field: fields) {
-                field.setAccessible(true);
-                switch (SqlType.fromClass(field.getType())) {
-                    case BOOLEAN:
-                        field.setBoolean(instance, rs.getBoolean(++i));
-                        break;
-                    case STRING:
-                        field.set(instance, rs.getString(++i));
-                        break;
-                    case INTEGER:
-                        field.setInt(instance, rs.getInt(++i));
-                        break;
-                    case DOUBLE:
-                        field.setDouble(instance, rs.getDouble(++i));
-                        break;
-                    case FLOAT:
-                        field.setFloat(instance, rs.getFloat(++i));
-                        break;
-                    case LONG:
-                        field.setLong(instance, rs.getLong(++i));
-                        break;
-                    case TIMESTAMP:
-                        field.set(instance, rs.getTimestamp(++i));
-                        break;
+            if (sqlType.equals(SqlType.GENERIC)) {
+                T instance = type.getConstructor().newInstance();
+                int i = 0;
+                Field[] fields = type.getDeclaredFields();
+                for (Field field : fields) {
+                    field.setAccessible(true);
+                    field.set(instance, mapValue(SqlType.fromClass(field.getType()), rs, ++i));
+                    field.setAccessible(false);
                 }
-                field.setAccessible(false);
+                return instance;
+            } else {
+                // map single value returned from sql
+                return mapValue(sqlType, rs, 1);
             }
-            return instance;
-        } catch (InstantiationException|IllegalAccessException|InvocationTargetException|NoSuchMethodException e) {
+
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException("Could not map row due to reflection error", e);
+        }
+    }
+
+    private <T> T mapValue(SqlType sqlType, ResultSet rs, int idx) throws SQLException {
+        switch (sqlType) {
+            case BOOLEAN:
+                return (T) (Object) rs.getBoolean(idx);
+            case STRING:
+                return (T) rs.getString(idx);
+            case INTEGER:
+                return (T) (Object) rs.getInt(idx);
+            case DOUBLE:
+                return (T) (Object) rs.getDouble(idx);
+            case FLOAT:
+                return (T) (Object) rs.getFloat(idx);
+            case LONG:
+                return (T) (Object) rs.getLong(idx);
+            case TIMESTAMP:
+                return (T) rs.getTimestamp(idx);
+            default:
+                throw new JdbcException("Cannot map result set column value to generic type");
         }
     }
 }

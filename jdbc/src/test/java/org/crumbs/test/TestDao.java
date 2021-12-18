@@ -73,4 +73,8 @@ public class TestDao {
                 .build()
         );
     }
+
+    public List<String> retrieveListOfColumns() {
+        return manager.executeQuery(Jdbc.query("select name from users", String.class).build());
+    }
 }
