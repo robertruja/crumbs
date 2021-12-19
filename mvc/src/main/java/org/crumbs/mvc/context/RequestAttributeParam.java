@@ -1,5 +1,6 @@
 package org.crumbs.mvc.context;
 
+import org.crumbs.mvc.exception.HandlerInvocationException;
 import org.crumbs.mvc.http.Request;
 
 public class RequestAttributeParam implements HandlerParam {
@@ -19,7 +20,17 @@ public class RequestAttributeParam implements HandlerParam {
         if(value.equals("")) {
             key = name;
         }
-        return request.getAttribute(key);
+
+        Object attribute = request.getAttribute(key);
+
+        if(attribute == null && clazz.isPrimitive()) {
+            throw new HandlerInvocationException("Can not map null attribute to parameter type: " + clazz.getName());
+        }
+        if(attribute != null && !attribute.getClass().equals(clazz)) {
+            throw new HandlerInvocationException("Can not map type " + attribute.getClass().getName() +
+                    " to parameter type " + clazz.getName());
+        }
+        return attribute;
     }
 
 }
