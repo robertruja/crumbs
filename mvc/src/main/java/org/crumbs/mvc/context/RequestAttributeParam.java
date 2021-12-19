@@ -27,10 +27,12 @@ public class RequestAttributeParam implements HandlerParam {
             throw new HandlerInvocationException("Can not map null attribute to parameter type: " + clazz.getName());
         }
         if(attribute != null && !attribute.getClass().equals(clazz)) {
-            throw new HandlerInvocationException("Can not map type " + attribute.getClass().getName() +
-                    " to parameter type " + clazz.getName());
+            // cover primitive types
+            if(!attribute.getClass().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+                throw new HandlerInvocationException("Can not map type " + attribute.getClass().getName() +
+                        " to parameter type " + clazz.getName());
+            }
         }
         return attribute;
     }
-
 }
