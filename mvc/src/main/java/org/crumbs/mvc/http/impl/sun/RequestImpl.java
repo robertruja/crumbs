@@ -1,5 +1,6 @@
 package org.crumbs.mvc.http.impl.sun;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.crumbs.core.util.IOUtil;
 import org.crumbs.mvc.common.model.HttpMethod;
@@ -32,7 +33,14 @@ public class RequestImpl implements Request {
         request.method = HttpMethod.valueOf(exchange.getRequestMethod());
         request.urlPath = exchange.getRequestURI().getPath();
         request.readQuery(exchange.getRequestURI().getQuery());
+        request.readHeaders(exchange.getRequestHeaders());
         return request;
+    }
+
+    private void readHeaders(Headers requestHeaders) {
+        requestHeaders.forEach((key, val) -> {
+            headers.put(key, val);
+        });
     }
 
     public byte[] getBody() {
@@ -46,6 +54,11 @@ public class RequestImpl implements Request {
     @Override
     public String getPathVarialbe(String name) {
         return pathVariables.get(name);
+    }
+
+    @Override
+    public List<String> getHeader(String key) {
+        return headers.get(key);
     }
 
     private void readQuery(String qs) {

@@ -92,6 +92,8 @@ public class HandlerContext {
                         }
                     }
                 }
+            } else {
+                continue;
             }
             return handlerMap.get(mapping);
         }

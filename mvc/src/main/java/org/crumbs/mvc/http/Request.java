@@ -3,6 +3,7 @@ package org.crumbs.mvc.http;
 import org.crumbs.mvc.common.model.HttpMethod;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 public interface Request {
@@ -16,5 +17,6 @@ public interface Request {
     byte[] getBody();
     String getBodyAsString(Charset charset);
     String getPathVarialbe(String name);
+    List<String> getHeader(String key);
 
 }

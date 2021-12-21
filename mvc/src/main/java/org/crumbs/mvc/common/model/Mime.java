@@ -2,6 +2,7 @@ package org.crumbs.mvc.common.model;
 
 public enum Mime {
     APPLICATION_JSON("application/json"),
+    APPLICATION_OCTET_STREAM("application/octet-stream"),
     TEXT_HTML("text/html"),
     TEXT_PLAIN("text/plain");
 

@@ -14,6 +14,7 @@ public class ConfigLoader {
     private static Logger LOGGER = Logger.getLogger(ConfigLoader.class);
 
     public static Map<String, String> loadProperties() {
+        envToSystemProperties();
         Properties properties = new Properties();
         InputStream propertiesStream = ConfigLoader.class.getClassLoader().getResourceAsStream("crumbs.properties");
         try {
@@ -34,6 +35,12 @@ public class ConfigLoader {
             LOGGER.warn("No crumbs properties found in classpath");
         }
         return null;
+    }
+
+    private static void envToSystemProperties() {
+        System.getenv().forEach((key, val) -> {
+            System.setProperty(key.toLowerCase().replace("_", "."), val);
+        });
     }
 
     private static Map<String, String> replaceValues(Map<String, String> propertyMap) {
