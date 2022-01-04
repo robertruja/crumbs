@@ -26,6 +26,7 @@ public class HandlerContext {
     private CrumbsContext context;
 
     private Map<String, Map<HttpMethod, Handler>> handlerMap = new HashMap<>();
+    private List<String> handlerPaths;
     private List<HandlerInterceptor> interceptors;
 
     @CrumbInit
@@ -42,24 +43,20 @@ public class HandlerContext {
                 handlerMap.put(handler.getURI(), httpMethodMapping);
             });
         });
+        handlerPaths = handlerMap.keySet().stream()
+                .sorted(Comparator.comparing(key -> key.contains("{") ? 1 : 0, Integer::compareTo))
+                .collect(Collectors.toList());
+
         interceptors = context.getCrumbsWithInterface(HandlerInterceptor.class)
                 .stream()
-                .sorted(
-                        Comparator.comparing(crumb -> crumb, (int1, int2) -> {
-                            int first = (int1 instanceof CorsHandlerInterceptor) ? -1 : 1;
-                            int second = (int2 instanceof CorsHandlerInterceptor) ? -1 : 1;
-                            return Integer.compare(first, second);
-                        }).thenComparing(crumb -> crumb, (int1, int2) -> {
-                            int first = (SecurityInterceptor.class.isAssignableFrom(int1.getClass())) ? -1 : 1;
-                            int second = (SecurityInterceptor.class.isAssignableFrom(int2.getClass())) ? -1 : 1;
-                            return Integer.compare(first, second);
-                        }).thenComparing(crumb -> crumb, (int1, int2) -> {
-                            Order order1 = int1.getClass().getAnnotation(Order.class);
-                            Order order2 = int2.getClass().getAnnotation(Order.class);
-                            int intOrder1 = order1 == null ? 0 : order1.value();
-                            int intOrder2 = order2 == null ? 0 : order2.value();
-                            return Integer.compare(intOrder1, intOrder2);
-                        }))
+                .sorted(Comparator.comparing(crumb -> crumb instanceof CorsHandlerInterceptor ? -1 : 1,
+                        Integer::compareTo)
+                        .thenComparing(crumb -> SecurityInterceptor.class.isAssignableFrom(crumb.getClass()) ? -1 : 1,
+                                Integer::compareTo)
+                        .thenComparing(crumb -> {
+                            Order order = crumb.getClass().getAnnotation(Order.class);
+                            return order == null ? 0 : order.value();
+                        }, Integer::compareTo))
                 .collect(Collectors.toList());
     }
 
@@ -89,7 +86,7 @@ public class HandlerContext {
 
     private Map<HttpMethod, Handler> findPath(Request request) {
         mapping:
-        for (String mapping : handlerMap.keySet()) {
+        for (String mapping : handlerPaths) {
             String[] subMappings = mapping.substring(1).split("/");
             String[] subPaths = request.getUrlPath().substring(1).split("/");
             if (subMappings.length == subPaths.length) {
