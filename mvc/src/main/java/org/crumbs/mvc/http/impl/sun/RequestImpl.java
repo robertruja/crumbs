@@ -39,7 +39,7 @@ public class RequestImpl implements Request {
 
     private void readHeaders(Headers requestHeaders) {
         requestHeaders.forEach((key, val) -> {
-            headers.put(key, val);
+            headers.put(key.toLowerCase(), val);
         });
     }
 
@@ -58,7 +58,7 @@ public class RequestImpl implements Request {
 
     @Override
     public List<String> getHeader(String key) {
-        return headers.get(key);
+        return headers.get(key.toLowerCase());
     }
 
     private void readQuery(String qs) {

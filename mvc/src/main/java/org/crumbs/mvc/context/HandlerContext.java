@@ -13,6 +13,8 @@ import org.crumbs.mvc.http.Request;
 import org.crumbs.mvc.http.Response;
 import org.crumbs.mvc.interceptor.HandlerInterceptor;
 import org.crumbs.mvc.interceptor.Order;
+import org.crumbs.mvc.security.SecurityInterceptor;
+import org.crumbs.mvc.security.cors.CorsHandlerInterceptor;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +35,7 @@ public class HandlerContext {
             List<Handler> handlers = Handler.fromObject(handlerCrumb);
             handlers.forEach(handler -> {
                 Map<HttpMethod, Handler> httpMethodMapping = handlerMap.get(handler.getURI());
-                if(httpMethodMapping == null) {
+                if (httpMethodMapping == null) {
                     httpMethodMapping = new HashMap<>();
                 }
                 httpMethodMapping.put(handler.getHttpMethod(), handler);
@@ -42,20 +44,29 @@ public class HandlerContext {
         });
         interceptors = context.getCrumbsWithInterface(HandlerInterceptor.class)
                 .stream()
-                .sorted((int1, int2) -> {
-                    Order order1 = int1.getClass().getAnnotation(Order.class);
-                    Order order2 = int2.getClass().getAnnotation(Order.class);
-                    int intOrder1 = order1 == null ? 0 : order1.value();
-                    int intOrder2 = order2 == null ? 0 : order2.value();
-                    return Integer.compare(intOrder2, intOrder1);
-                })
+                .sorted(
+                        Comparator.comparing(crumb -> crumb, (int1, int2) -> {
+                            int first = (int1 instanceof CorsHandlerInterceptor) ? -1 : 1;
+                            int second = (int2 instanceof CorsHandlerInterceptor) ? -1 : 1;
+                            return Integer.compare(first, second);
+                        }).thenComparing(crumb -> crumb, (int1, int2) -> {
+                            int first = (SecurityInterceptor.class.isAssignableFrom(int1.getClass())) ? -1 : 1;
+                            int second = (SecurityInterceptor.class.isAssignableFrom(int2.getClass())) ? -1 : 1;
+                            return Integer.compare(first, second);
+                        }).thenComparing(crumb -> crumb, (int1, int2) -> {
+                            Order order1 = int1.getClass().getAnnotation(Order.class);
+                            Order order2 = int2.getClass().getAnnotation(Order.class);
+                            int intOrder1 = order1 == null ? 0 : order1.value();
+                            int intOrder2 = order2 == null ? 0 : order2.value();
+                            return Integer.compare(intOrder1, intOrder2);
+                        }))
                 .collect(Collectors.toList());
     }
 
     public boolean intercept(Request request, Response response) {
         boolean shouldContinue = true;
-        for(HandlerInterceptor interceptor: interceptors) {
-            if(!interceptor.handle(request, response)) {
+        for (HandlerInterceptor interceptor : interceptors) {
+            if (!interceptor.handle(request, response)) {
                 shouldContinue = false;
                 break;
             }
@@ -65,11 +76,11 @@ public class HandlerContext {
 
     public HandlerInvocationResult invokeHandler(Request request) throws Exception {
         Map<HttpMethod, Handler> httpMethodMapping = findPath(request);
-        if(httpMethodMapping == null) {
+        if (httpMethodMapping == null) {
             throw new HandlerNotFoundException("Could not find handler for resource: " + request.getUrlPath());
         }
         Handler handler = httpMethodMapping.get(request.getMethod());
-        if(handler == null) {
+        if (handler == null) {
             throw new HttpMethodNotAllowedException("There is no mapping for " + request.getMethod()
                     + " for path " + request.getUrlPath());
         }
@@ -77,15 +88,16 @@ public class HandlerContext {
     }
 
     private Map<HttpMethod, Handler> findPath(Request request) {
-        mapping: for(String mapping: handlerMap.keySet()) {
+        mapping:
+        for (String mapping : handlerMap.keySet()) {
             String[] subMappings = mapping.substring(1).split("/");
             String[] subPaths = request.getUrlPath().substring(1).split("/");
-            if(subMappings.length == subPaths.length) {
+            if (subMappings.length == subPaths.length) {
                 for (int i = 0; i < subMappings.length; i++) {
                     String subMapping = subMappings[i];
                     String subPath = subPaths[i];
-                    if(!subMapping.equals(subPath)) {
-                        if(subMapping.startsWith("{") && subMapping.endsWith("}")) {
+                    if (!subMapping.equals(subPath)) {
+                        if (subMapping.startsWith("{") && subMapping.endsWith("}")) {
                             request.setPathVariable(subMapping.substring(1, subMapping.length() - 1), subPath);
                         } else {
                             continue mapping;
