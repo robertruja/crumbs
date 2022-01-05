@@ -56,7 +56,9 @@ public class Server {
                     Response response = new ResponseImpl(exchange);
                     dispatcher.handle(request, response);
                     try {
-                        exchange.sendResponseHeaders(response.getStatus().getCode(), response.getBody().length);
+                        int code = response.getStatus().getCode();
+                        int length = response.getBody().length;
+                        exchange.sendResponseHeaders(code, code == 204 ? -1: length);
                         OutputStream os = exchange.getResponseBody();
                         os.write(response.getBody());
                         os.close();

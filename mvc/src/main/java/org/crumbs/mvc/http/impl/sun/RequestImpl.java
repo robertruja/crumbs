@@ -6,9 +6,11 @@ import org.crumbs.core.util.IOUtil;
 import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.http.Request;
 
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,10 @@ public class RequestImpl implements Request {
         return IOUtil.readInputStream(exchange.getRequestBody());
     }
 
+    public InputStream getBodyInputStream() {
+        return exchange.getRequestBody();
+    }
+
     public String getBodyAsString(Charset charset) {
         return new String(getBody(), charset);
     }
@@ -59,6 +65,11 @@ public class RequestImpl implements Request {
     @Override
     public List<String> getHeader(String key) {
         return headers.get(key.toLowerCase());
+    }
+
+    @Override
+    public Map<String, List<String>> getHeaders() {
+        return Collections.unmodifiableMap(headers);
     }
 
     private void readQuery(String qs) {

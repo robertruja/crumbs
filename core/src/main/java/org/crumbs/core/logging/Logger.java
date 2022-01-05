@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Matcher;
 
 public class Logger {
 
@@ -88,7 +89,7 @@ public class Logger {
     private String formatMessage(String message, Object... args) {
         String formatted = message;
         for(Object arg: args) {
-            formatted = formatted.replaceFirst("\\{}", arg.toString());
+            formatted = formatted.replaceFirst("\\{}", Matcher.quoteReplacement(arg.toString()));
         }
         return formatted;
     }
