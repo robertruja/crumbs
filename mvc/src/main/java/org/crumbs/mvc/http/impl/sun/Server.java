@@ -14,7 +14,6 @@ import org.crumbs.mvc.http.Request;
 import org.crumbs.mvc.http.Response;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
@@ -55,16 +54,7 @@ public class Server {
                     Request request = RequestImpl.from(exchange);
                     Response response = new ResponseImpl(exchange);
                     dispatcher.handle(request, response);
-                    try {
-                        int code = response.getStatus().getCode();
-                        int length = response.getBody().length;
-                        exchange.sendResponseHeaders(code, code == 204 ? -1: length);
-                        OutputStream os = exchange.getResponseBody();
-                        os.write(response.getBody());
-                        os.close();
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex.getMessage());
-                    }
+                    response.flush();
                 }
             });
             server.start();
