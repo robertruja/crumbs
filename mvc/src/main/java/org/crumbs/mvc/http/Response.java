@@ -7,12 +7,19 @@ import java.io.OutputStream;
 
 public interface Response {
 
-    void setStatus(HttpStatus status);
-    void setBody(byte[] body);
     void setMime(Mime mime);
+
     void addHeader(String key, String val);
+
     HttpStatus getStatus();
+
+    void setStatus(HttpStatus status);
+
     byte[] getBody();
+
+    void setBody(byte[] body);
+
     OutputStream getOutputStream();
+
     void flush();
 }

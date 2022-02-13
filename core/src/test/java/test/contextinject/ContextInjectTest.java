@@ -3,10 +3,9 @@ package test.contextinject;
 import org.crumbs.core.annotation.CrumbsApplication;
 import org.crumbs.core.context.CrumbsApp;
 import org.crumbs.core.context.CrumbsContext;
-import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @CrumbsApplication
 public class ContextInjectTest {

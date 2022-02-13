@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Jdbc {
-    private Jdbc(){}
+    private Jdbc() {
+    }
 
     public static <T> JdbcQueryBuilder<T> query(String queryString, Class<T> clazz) {
         return new JdbcQueryBuilder<>(queryString, clazz);
@@ -29,7 +30,8 @@ public class Jdbc {
         private List<Object> parameters;
         private Class<T> rsType;
 
-        private Query(){}
+        private Query() {
+        }
 
         @Override
         public String getSql() {
@@ -52,7 +54,8 @@ public class Jdbc {
         private String updateString;
         private List<Object> parameters;
 
-        private Update(){}
+        private Update() {
+        }
 
         @Override
         public String getStatement() {
@@ -83,7 +86,8 @@ public class Jdbc {
 
     public static class JdbcQueryBuilder<T> {
         private Query<T> query;
-        private JdbcQueryBuilder(String queryString, Class<T> clazz){
+
+        private JdbcQueryBuilder(String queryString, Class<T> clazz) {
             this.query = new Query<>();
             query.parameters = new ArrayList<>();
             query.rsType = clazz;
@@ -102,11 +106,13 @@ public class Jdbc {
 
     public static class JdbcUpdateBuilder {
         private Update update;
-        private JdbcUpdateBuilder(String updateString){
+
+        private JdbcUpdateBuilder(String updateString) {
             this.update = new Update();
             update.updateString = updateString;
             update.parameters = new ArrayList<>();
         }
+
         public JdbcUpdateBuilder nextParam(Object param) {
             update.parameters.add(param);
             return this;
@@ -119,6 +125,7 @@ public class Jdbc {
 
     public static class JdbcBatchUpdateBuilder {
         private BatchUpdate batchUpdate;
+
         private JdbcBatchUpdateBuilder(String updateString) {
             this.batchUpdate = new BatchUpdate();
             batchUpdate.updateString = updateString;

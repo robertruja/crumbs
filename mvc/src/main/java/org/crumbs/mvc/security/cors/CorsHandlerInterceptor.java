@@ -29,7 +29,7 @@ public class CorsHandlerInterceptor implements HandlerInterceptor {
             }
         }
 
-        if(request.getHeader("Origin") != null ) {
+        if (request.getHeader("Origin") != null) {
             response.addHeader("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN);
         }
         return true;

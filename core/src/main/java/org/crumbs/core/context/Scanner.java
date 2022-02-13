@@ -23,13 +23,13 @@ public class Scanner {
             allResourceUrls.add(enumeration.nextElement());
         }
 
-        for (URL url: allResourceUrls) {
+        for (URL url : allResourceUrls) {
             String path = url.getPath();
-            if(!isJar(path)) {
+            if (!isJar(path)) {
                 allClasses.addAll(findClassesInDir(new File(url.getFile()), packageName));
             } else {
                 String jarPath = path.substring(6, path.lastIndexOf("!"));
-                if(!isWindows()){
+                if (!isWindows()) {
                     jarPath = "/" + jarPath;
                 }
                 allClasses.addAll(findClassesInJar(jarPath));

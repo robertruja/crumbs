@@ -14,7 +14,7 @@ public class RequestBodyParam implements HandlerParam {
 
     @Override
     public Object value(Request request) {
-        if(type.equals(Request.class)) {
+        if (type.equals(Request.class)) {
             return request;
         }
         try {

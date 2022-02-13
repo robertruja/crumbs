@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BatchUpdateParameters {
-    private BatchUpdateParameters() {}
     private List<?> parameters;
+
+    private BatchUpdateParameters() {
+    }
 
     public static BatchUpdateParameters from(Object... params) {
         BatchUpdateParameters parameters = new BatchUpdateParameters();

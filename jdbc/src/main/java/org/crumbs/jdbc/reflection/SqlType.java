@@ -13,18 +13,17 @@ public enum SqlType {
     TIMESTAMP;
 
     public static SqlType fromClass(Class<?> clazz) {
-        if(clazz.equals(Boolean.class) || clazz.equals(boolean.class)){
+        if (clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
             return BOOLEAN;
-        }
-        else if(clazz.equals(String.class)) {
+        } else if (clazz.equals(String.class)) {
             return STRING;
-        } else if (clazz.equals(Integer.class) || clazz.equals(int.class)){
+        } else if (clazz.equals(Integer.class) || clazz.equals(int.class)) {
             return INTEGER;
-        } else if (clazz.equals(Long.class) || clazz.equals(long.class)){
+        } else if (clazz.equals(Long.class) || clazz.equals(long.class)) {
             return LONG;
-        } else if (clazz.equals(Double.class) || clazz.equals(double.class)){
+        } else if (clazz.equals(Double.class) || clazz.equals(double.class)) {
             return DOUBLE;
-        } else if (clazz.equals(Float.class) || clazz.equals(float.class)){
+        } else if (clazz.equals(Float.class) || clazz.equals(float.class)) {
             return FLOAT;
         } else if (clazz.equals(Timestamp.class)) {
             return TIMESTAMP;

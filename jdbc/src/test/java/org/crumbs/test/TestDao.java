@@ -62,14 +62,14 @@ public class TestDao {
         manager.batchInsert(Jdbc.batchUpdate(INSERT_SQL)
                 .params(rowModelList.stream().map(rowModel ->
                         BatchUpdateParameters.from(
-                        rowModel.getId(),
-                        rowModel.getName(),
-                        rowModel.getAge(),
-                        rowModel.getEventTime(),
-                        rowModel.getName(),
-                        rowModel.getAge(),
-                        rowModel.getEventTime()
-                )).collect(Collectors.toList()))
+                                rowModel.getId(),
+                                rowModel.getName(),
+                                rowModel.getAge(),
+                                rowModel.getEventTime(),
+                                rowModel.getName(),
+                                rowModel.getAge(),
+                                rowModel.getEventTime()
+                        )).collect(Collectors.toList()))
                 .build()
         );
     }

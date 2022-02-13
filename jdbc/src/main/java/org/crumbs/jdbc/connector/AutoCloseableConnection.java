@@ -14,16 +14,16 @@ public class AutoCloseableConnection implements Connection {
 
     public AutoCloseableConnection(Connection sqlConnection, int timeout) {
         this.connection = sqlConnection;
-        this.timeout = timeout*1000;
+        this.timeout = timeout * 1000;
         keepAliveUntilExpiration();
     }
 
     private void keepAliveUntilExpiration() {
         Thread thread = new Thread(() -> {
-            while(true) {
+            while (true) {
                 try {
                     Thread.sleep(3000);
-                    if(System.currentTimeMillis() - lastUsed > timeout) {
+                    if (System.currentTimeMillis() - lastUsed > timeout) {
                         connection.close();
                         break;
                     }
@@ -66,15 +66,15 @@ public class AutoCloseableConnection implements Connection {
     }
 
     @Override
-    public void setAutoCommit(boolean autoCommit) throws SQLException {
-        reset();
-        connection.setAutoCommit(autoCommit);
-    }
-
-    @Override
     public boolean getAutoCommit() throws SQLException {
         reset();
         return connection.getAutoCommit();
+    }
+
+    @Override
+    public void setAutoCommit(boolean autoCommit) throws SQLException {
+        reset();
+        connection.setAutoCommit(autoCommit);
     }
 
     @Override
@@ -90,7 +90,8 @@ public class AutoCloseableConnection implements Connection {
     }
 
     @Override
-    public void close() throws SQLException {}
+    public void close() throws SQLException {
+    }
 
     @Override
     public boolean isClosed() throws SQLException {
@@ -105,21 +106,15 @@ public class AutoCloseableConnection implements Connection {
     }
 
     @Override
-    public void setReadOnly(boolean readOnly) throws SQLException {
-        reset();
-        connection.setReadOnly(readOnly);
-    }
-
-    @Override
     public boolean isReadOnly() throws SQLException {
         reset();
         return connection.isReadOnly();
     }
 
     @Override
-    public void setCatalog(String catalog) throws SQLException {
+    public void setReadOnly(boolean readOnly) throws SQLException {
         reset();
-        connection.setCatalog(catalog);
+        connection.setReadOnly(readOnly);
     }
 
     @Override
@@ -129,15 +124,21 @@ public class AutoCloseableConnection implements Connection {
     }
 
     @Override
-    public void setTransactionIsolation(int level) throws SQLException {
+    public void setCatalog(String catalog) throws SQLException {
         reset();
-        connection.setTransactionIsolation(level);
+        connection.setCatalog(catalog);
     }
 
     @Override
     public int getTransactionIsolation() throws SQLException {
         reset();
         return connection.getTransactionIsolation();
+    }
+
+    @Override
+    public void setTransactionIsolation(int level) throws SQLException {
+        reset();
+        connection.setTransactionIsolation(level);
     }
 
     @Override
@@ -183,15 +184,15 @@ public class AutoCloseableConnection implements Connection {
     }
 
     @Override
-    public void setHoldability(int holdability) throws SQLException {
-        reset();
-        connection.setHoldability(holdability);
-    }
-
-    @Override
     public int getHoldability() throws SQLException {
         reset();
         return connection.getHoldability();
+    }
+
+    @Override
+    public void setHoldability(int holdability) throws SQLException {
+        reset();
+        connection.setHoldability(holdability);
     }
 
     @Override
@@ -291,12 +292,6 @@ public class AutoCloseableConnection implements Connection {
     }
 
     @Override
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-        reset();
-        connection.setClientInfo(properties);
-    }
-
-    @Override
     public String getClientInfo(String name) throws SQLException {
         reset();
         return connection.getClientInfo(name);
@@ -306,6 +301,12 @@ public class AutoCloseableConnection implements Connection {
     public Properties getClientInfo() throws SQLException {
         reset();
         return connection.getClientInfo();
+    }
+
+    @Override
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
+        reset();
+        connection.setClientInfo(properties);
     }
 
     @Override
@@ -321,15 +322,15 @@ public class AutoCloseableConnection implements Connection {
     }
 
     @Override
-    public void setSchema(String schema) throws SQLException {
-        reset();
-        connection.setSchema(schema);
-    }
-
-    @Override
     public String getSchema() throws SQLException {
         reset();
         return connection.getSchema();
+    }
+
+    @Override
+    public void setSchema(String schema) throws SQLException {
+        reset();
+        connection.setSchema(schema);
     }
 
     @Override

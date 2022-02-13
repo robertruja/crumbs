@@ -13,18 +13,6 @@ import static org.junit.Assert.assertNotNull;
 @CrumbsApplication
 public class CrumbsWithInterfaceTest {
 
-    @Crumb
-    public static class TestClass {
-
-        @CrumbRef
-        private InterfaceAnnotatedWithPlainCrumb crumb;
-
-        public InterfaceAnnotatedWithPlainCrumb getCrumb() {
-            return crumb;
-        }
-    }
-
-
     @Test
     public void shouldReturnCrumbsWithAnnotationOnInterface() {
         CrumbsContext context = CrumbsApp.run(CrumbsWithInterfaceTest.class);
@@ -44,5 +32,16 @@ public class CrumbsWithInterfaceTest {
 
         assertNotNull(crumb);
         assertEquals("StereotypeIfaceCrumb", crumb.call());
+    }
+
+    @Crumb
+    public static class TestClass {
+
+        @CrumbRef
+        private InterfaceAnnotatedWithPlainCrumb crumb;
+
+        public InterfaceAnnotatedWithPlainCrumb getCrumb() {
+            return crumb;
+        }
     }
 }

@@ -2,7 +2,7 @@ package org.crumbs.mvc.http.impl.sun;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import org.crumbs.core.util.IOUtil;
+import org.crumbs.core.util.IOUtils;
 import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.http.Request;
 
@@ -46,7 +46,7 @@ public class RequestImpl implements Request {
     }
 
     public byte[] getBody() {
-        return IOUtil.readInputStream(exchange.getRequestBody());
+        return IOUtils.readInputStream(exchange.getRequestBody());
     }
 
     public InputStream getBodyInputStream() {

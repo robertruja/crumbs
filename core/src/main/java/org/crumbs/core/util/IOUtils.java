@@ -1,10 +1,13 @@
 package org.crumbs.core.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
-public class IOUtil {
-    private IOUtil(){}
+public class IOUtils {
+    private IOUtils() {
+    }
 
     public static byte[] readInputStream(InputStream is) {
         try {
@@ -38,5 +41,19 @@ public class IOUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void writeToOutputStream(byte[] input, OutputStream out) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(input);
+        writeIO(bais, out);
+    }
+
+    public static void writeIO(InputStream payloadInput, OutputStream out) throws IOException {
+        byte[] buf = new byte[8192];
+        int length;
+        while ((length = payloadInput.read(buf)) > 0) {
+            out.write(buf, 0, length);
+        }
+        out.close();
     }
 }
