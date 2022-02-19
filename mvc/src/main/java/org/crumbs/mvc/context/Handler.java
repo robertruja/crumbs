@@ -47,9 +47,6 @@ public class Handler {
                             method.getAnnotation(org.crumbs.mvc.annotation.Handler.class);
 
                     String subPath = annotation.mapping();
-                    if (!subPath.startsWith("/")) {
-                        throw new CrumbsMVCInitException("Invalid handler path: " + rootPath + ". Must start with '/'");
-                    }
                     HttpMethod httpMethod = annotation.method();
                     Mime mime = annotation.producesContent();
                     Handler handler = new Handler();
@@ -105,6 +102,7 @@ public class Handler {
     public HandlerInvocationResult invoke(Request request) throws Exception {
         try {
             Object[] parameters = getParameters(request);
+            method.setAccessible(true);
             Object invocationResult = method.invoke(handlerRootInstance, parameters);
 
             return new HandlerInvocationResult(responseContentType, invocationResult,

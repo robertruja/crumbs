@@ -11,10 +11,10 @@ import org.crumbs.core.annotation.CrumbsApplication;
 import org.crumbs.core.context.CrumbsApp;
 import org.crumbs.core.context.CrumbsContext;
 import org.crumbs.mvc.http.impl.sun.Server;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @CrumbsApplication
 @Crumb

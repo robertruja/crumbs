@@ -9,6 +9,7 @@ import org.crumbs.core.logging.Logger;
 import org.crumbs.core.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.time.Duration;
@@ -61,24 +62,27 @@ public class CrumbsContext {
                         Property property = field.getAnnotation(Property.class);
                         String propertyKey = property.value();
                         String value = properties.get(propertyKey);
+                        if(value == null) {
+                            return;
+                        }
                         try {
                             Class<?> type = field.getType();
                             if (type.equals(String.class)) {
                                 field.set(crumb, value);
                             } else if (type.equals(Integer.class)) {
-                                Integer intValue = value == null ? null : Integer.parseInt(value);
+                                Integer intValue = Integer.parseInt(value);
                                 field.set(crumb, intValue);
                             } else if (type.equals(Long.class)) {
-                                Long longValue = value == null ? null : Long.parseLong(value);
+                                Long longValue = Long.parseLong(value);
                                 field.set(crumb, longValue);
                             } else if (type.equals(Double.class)) {
-                                Double doubleValue = value == null ? null : Double.parseDouble(value);
+                                Double doubleValue = Double.parseDouble(value);
                                 field.set(crumb, doubleValue);
                             } else if (type.equals(Boolean.class)) {
-                                Boolean boolValue = value == null ? null : Boolean.parseBoolean(value);
+                                Boolean boolValue = Boolean.parseBoolean(value);
                                 field.set(crumb, boolValue);
                             } else if (type.equals(Duration.class)) {
-                                Duration duration = value == null ? null : Duration.parse(value);
+                                Duration duration = Duration.parse(value);
                                 field.set(crumb, duration);
                             } else {
                                 throw new CrumbsInitException("Could not inject value in field " + field.getName() +
@@ -171,7 +175,10 @@ public class CrumbsContext {
                 .filter(clazz -> !clazz.isAnnotation() && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers()))
                 .forEach(clazz -> {
                     try {
-                        crumbs.put(clazz, clazz.getDeclaredConstructor().newInstance());
+                        Constructor constructor = clazz.getDeclaredConstructor();
+                        constructor.setAccessible(true);
+                        Object instance = constructor.newInstance();
+                        crumbs.put(clazz, instance);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                         throw new CrumbsInitException("Error occurred on load or scan for crumbs", e);
                     }

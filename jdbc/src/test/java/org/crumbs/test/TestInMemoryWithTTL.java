@@ -3,14 +3,15 @@ package org.crumbs.test;
 import org.crumbs.core.annotation.CrumbsApplication;
 import org.crumbs.core.context.CrumbsApp;
 import org.crumbs.core.context.CrumbsContext;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Ignore
+@Disabled
 @CrumbsApplication
 public class TestInMemoryWithTTL {
     static {
@@ -33,7 +34,7 @@ public class TestInMemoryWithTTL {
 
         List<RowModel> results = testDao.retrieveRowModels(16);
 
-        Assert.assertEquals(1, results.size());
+        Assertions.assertEquals(1, results.size());
         System.out.println(results);
 
         for (int i = 0; i < 10; i++) {
@@ -41,18 +42,18 @@ public class TestInMemoryWithTTL {
 
             results = testDao.retrieveRowModels(16);
 
-            Assert.assertEquals(1, results.size());
+            Assertions.assertEquals(1, results.size());
             System.out.println(results);
         }
 
         TimeUnit.SECONDS.sleep(4);
         results = testDao.retrieveRowModels(16);
-        Assert.assertEquals(1, results.size());
+        Assertions.assertEquals(1, results.size());
         System.out.println(results);
 
         TimeUnit.SECONDS.sleep(6);
         results = testDao.retrieveRowModels(16);
-        Assert.assertEquals(1, results.size());
+        Assertions.assertEquals(1, results.size());
         System.out.println(results);
     }
 }
