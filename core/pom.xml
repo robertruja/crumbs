@@ -11,5 +11,6 @@
     </parent>
 
     <artifactId>core</artifactId>
+    <version>1.1.0</version>
 
 </project>
