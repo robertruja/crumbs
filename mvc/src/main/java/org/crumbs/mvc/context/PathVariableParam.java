@@ -19,11 +19,11 @@ public class PathVariableParam implements HandlerParam {
     @Override
     public Object value(Request request) {
         String key = value;
-        if(value.equals("")) {
+        if (value.equals("")) {
             key = name;
         }
         String paramValue = request.getPathVarialbe(key);
-        if(paramValue == null && clazz.isPrimitive()) {
+        if (paramValue == null && clazz.isPrimitive()) {
             throw new HandlerInvocationException("Can not map null path var to primitive type: " + key);
         }
         try {

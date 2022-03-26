@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.crumbs</groupId>
-    <artifactId>crumbs-bom</artifactId>
+    <artifactId>crumbs-parent</artifactId>
     <version>1.1.0</version>
     <modules>
         <module>core</module>
         <module>jdbc</module>
         <module>mvc</module>
+        <module>client</module>
+        <module>testsupport</module>
     </modules>
     <packaging>pom</packaging>
-
 
     <build>
         <plugins>
@@ -21,9 +22,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                    <compilerArgument>-parameters</compilerArgument>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -31,9 +31,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -44,23 +44,4 @@
         </dependency>
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.crumbs</groupId>
-                <artifactId>core</artifactId>
-                <version>1.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.crumbs</groupId>
-                <artifactId>jdbc</artifactId>
-                <version>1.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.crumbs</groupId>
-                <artifactId>mvc</artifactId>
-                <version>1.1.0</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 </project>

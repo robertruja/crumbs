@@ -20,11 +20,14 @@ import java.util.concurrent.Executors;
 @Crumb
 public class Server {
 
-    private static final String LOCALHOST =  "127.0.0.1";
+    private static final String LOCALHOST = "127.0.0.1";
     // max socket connections that ServerSocket can accept
     private static final int BACKLOG = 1000;
 
     private Logger log = Logger.getLogger(Server.class);
+
+    @Property("crumbs.mvc.server.enabled")
+    private Boolean serverEnabled = true;
 
     @Property("crumbs.mvc.server.host")
     private String host;
@@ -38,29 +41,45 @@ public class Server {
 
     @CrumbInit
     public void start() {
-        if(host == null) {
-            host = LOCALHOST;
+        if (serverEnabled) {
+            if (host == null) {
+                host = LOCALHOST;
+            }
+            if (port == null) {
+                throw new CrumbsMVCInitException("Port must be specified as property in config file" +
+                        " as crumbs.mvc.server.port");
+            }
+            try {
+                server = HttpServer.create(new InetSocketAddress(host, port), BACKLOG);
+                server.setExecutor(Executors.newCachedThreadPool());
+                server.createContext("/", new HttpHandler() {
+                    @Override
+                    public void handle(HttpExchange exchange) throws IOException {
+                        Request request = RequestImpl.from(exchange);
+                        Response response = new ResponseImpl(exchange);
+                        dispatcher.handle(request, response);
+                        response.flush();
+                    }
+                });
+                server.start();
+            } catch (IOException e) {
+                throw new CrumbsMVCInitException("Could not start server due to exception", e);
+            }
+            log.info("Started Crumbs MVC server on host {} and port {}", host, port);
         }
-        if(port == null) {
-            throw new CrumbsMVCInitException("Port must be specified as property in config file" +
-                    " as crumbs.mvc.server.port");
-        }
-        try {
-            server = HttpServer.create(new InetSocketAddress(host, port), BACKLOG);
-            server.setExecutor(Executors.newCachedThreadPool());
-            server.createContext("/", new HttpHandler() {
-                @Override
-                public void handle(HttpExchange exchange) throws IOException {
-                    Request request = RequestImpl.from(exchange);
-                    Response response = new ResponseImpl(exchange);
-                    dispatcher.handle(request, response);
-                    response.flush();
-                }
-            });
-            server.start();
-        } catch (IOException e) {
-            throw new CrumbsMVCInitException("Could not start server due to exception", e);
-        }
-        log.info("Started Crumbs MVC server on host {} and port {}", host, port);
+    }
+
+    public void stop() {
+        log.info("Stopping Crumbs MVC server...");
+        server.stop(1);
+        log.info("Server stopped");
+    }
+
+    public void setServerEnabled(Boolean serverEnabled) {
+        this.serverEnabled = serverEnabled;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 }

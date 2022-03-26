@@ -25,10 +25,10 @@ public class RequestParam implements HandlerParam {
         }
         String paramValue = request.getQueryParams().get(key);
 
-        if(required && paramValue == null) {
+        if (required && paramValue == null) {
             throw new BadRequestException("Value is required for request parameter: '" + key + "'");
         }
-        if(paramValue == null && clazz.isPrimitive()) {
+        if (paramValue == null && clazz.isPrimitive()) {
             throw new HandlerInvocationException("Can not map null param to primitive type: " + key);
         }
 

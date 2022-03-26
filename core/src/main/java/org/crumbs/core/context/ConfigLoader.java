@@ -1,5 +1,6 @@
 package org.crumbs.core.context;
 
+import org.crumbs.core.exception.CrumbsInitException;
 import org.crumbs.core.logging.Logger;
 
 import java.io.IOException;
@@ -15,26 +16,27 @@ public class ConfigLoader {
 
     public static Map<String, String> loadProperties() {
         envToSystemProperties();
-        Properties properties = new Properties();
+        Map<String, String> systemProperties = System.getProperties().keySet().stream()
+                .collect(Collectors.toMap(Object::toString, key -> System.getProperty(key.toString())));
+
         InputStream propertiesStream = ConfigLoader.class.getClassLoader().getResourceAsStream("crumbs.properties");
-        try {
+        if (propertiesStream != null) {
             LOGGER.info("Found crumbs.properties, loading config");
-            if (propertiesStream != null) {
+            try {
+                Properties properties = new Properties();
                 properties.load(propertiesStream);
-                Map<String, String> propertiesMap = properties.keySet().stream()
-                        .map(Object::toString)
-                        .collect(Collectors.toMap(key -> key, properties::getProperty));
-                Map<String, String> replaced = replaceValues(propertiesMap);
-                replaced.putAll(System.getProperties().keySet().stream()
-                        .map(Object::toString)
-                        .collect(Collectors.toMap(key -> key, System::getProperty)
-                ));
+                Map<String, String> fileProperties = properties.keySet().stream()
+                        .collect(Collectors.toMap(Object::toString, key -> properties.get(key).toString()));
+                Map<String, String> replaced = replaceValues(fileProperties);
+                replaced.putAll(systemProperties);
                 return Collections.unmodifiableMap(replaced);
+            } catch (IOException e) {
+                throw new CrumbsInitException("Unable to load crumbs properties", e);
             }
-        } catch (IOException e) {
+        } else {
             LOGGER.warn("No crumbs properties found in classpath");
+            return Collections.unmodifiableMap(systemProperties);
         }
-        return null;
     }
 
     private static void envToSystemProperties() {

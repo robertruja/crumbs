@@ -1,17 +1,19 @@
 package org.crumbs.core.context;
 
-import org.crumbs.core.exception.CrumbsInitException;
-import org.crumbs.core.logging.Logger;
 import org.crumbs.core.annotation.Crumb;
 import org.crumbs.core.annotation.CrumbInit;
 import org.crumbs.core.annotation.CrumbRef;
 import org.crumbs.core.annotation.Property;
+import org.crumbs.core.exception.CrumbsInitException;
+import org.crumbs.core.logging.Logger;
+import org.crumbs.core.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CrumbsContext {
 
@@ -60,24 +62,27 @@ public class CrumbsContext {
                         Property property = field.getAnnotation(Property.class);
                         String propertyKey = property.value();
                         String value = properties.get(propertyKey);
+                        if(value == null) {
+                            return;
+                        }
                         try {
-                            Class type = field.getType();
+                            Class<?> type = field.getType();
                             if (type.equals(String.class)) {
                                 field.set(crumb, value);
                             } else if (type.equals(Integer.class)) {
-                                Integer intValue = value == null ? null : Integer.parseInt(value);
+                                Integer intValue = Integer.parseInt(value);
                                 field.set(crumb, intValue);
                             } else if (type.equals(Long.class)) {
-                                Long longValue = value == null ? null : Long.parseLong(value);
+                                Long longValue = Long.parseLong(value);
                                 field.set(crumb, longValue);
                             } else if (type.equals(Double.class)) {
-                                Double doubleValue = value == null ? null : Double.parseDouble(value);
+                                Double doubleValue = Double.parseDouble(value);
                                 field.set(crumb, doubleValue);
                             } else if (type.equals(Boolean.class)) {
-                                Boolean boolValue = value == null ? null : Boolean.parseBoolean(value);
+                                Boolean boolValue = Boolean.parseBoolean(value);
                                 field.set(crumb, boolValue);
                             } else if (type.equals(Duration.class)) {
-                                Duration duration = value == null ? null : Duration.parse(value);
+                                Duration duration = Duration.parse(value);
                                 field.set(crumb, duration);
                             } else {
                                 throw new CrumbsInitException("Could not inject value in field " + field.getName() +
@@ -94,6 +99,10 @@ public class CrumbsContext {
 
     public <T> T getCrumb(Class<T> clazz) {
         return (T) crumbs.get(clazz);
+    }
+
+    public String getProperty(String key) {
+        return properties.get(key);
     }
 
     public <U extends Annotation> List<?> getCrumbsWithAnnotation(Class<U> clazz) {
@@ -130,7 +139,7 @@ public class CrumbsContext {
                         Class<?> fieldType = field.getType();
                         Object value;
 
-                        if (fieldType.isAssignableFrom(this.getClass())) {
+                        if (fieldType.isAssignableFrom(CrumbsContext.class)) {
                             value = this;
                         } else {
                             value = crumbs.get(field.getType());
@@ -155,78 +164,24 @@ public class CrumbsContext {
     }
 
     private void loadCrumbs(String... packageNames) throws Exception {
-        Set<Class<?>> instantiable;
-        try {
-            List<Class<?>> scannedClasses = new ArrayList<>();
-            for (String name : packageNames) {
-                scannedClasses.addAll(Scanner.getClassesInPackage(name));
-            }
 
-            List<Class<?>> annotatedClasses = scannedClasses.stream()
-                    .filter(scannedClazz -> scannedClazz.getAnnotation(Crumb.class) != null)
-                    .collect(Collectors.toList());
-
-            instantiable = new HashSet<>();
-            Set<Class<?>> interfaces = new HashSet<>();
-            Set<Class<?>> annotations = new HashSet<>();
-
-            annotatedClasses.forEach(clazz -> {
-                if (clazz.isAnnotation()) {
-                    annotations.add(clazz);
-                } else if (clazz.isInterface()) {
-                    interfaces.add(clazz);
-                } else {
-                    instantiable.add(clazz);
-                }
-            });
-
-            instantiable.addAll(searchInstantiableStereotypeAnnotatedClasses(scannedClasses, interfaces, annotations));
-            instantiable.addAll(searchInstantiableAnnotatedInterfaces(scannedClasses, interfaces));
-
-
-        } catch (Exception e) {
-            throw new CrumbsInitException("Error occurred on load classes", e);
+        List<Class<?>> scannedClasses = new ArrayList<>();
+        for (String name : packageNames) {
+            scannedClasses.addAll(Scanner.getClassesInPackage(name));
         }
 
-        instantiable.forEach(crumbClass -> {
-            try {
-                crumbs.put(crumbClass, crumbClass.getDeclaredConstructor().newInstance());
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new CrumbsInitException("A fatal error occurred on class instantiation", e);
-            }
-        });
-    }
-
-    private <T extends Annotation> Collection<? extends Class<?>> searchInstantiableStereotypeAnnotatedClasses(
-            List<Class<?>> scannedClasses,
-            Set<Class<?>> interfaces,
-            Set<Class<?>> annotations) {
-        List<Class<?>> instantiable = new LinkedList<>();
-        annotations.forEach(annotation -> {
-            Class<T> typedAnnotation = (Class<T>) annotation;
-            scannedClasses.forEach(clazz -> {
-                if (clazz.getAnnotation(typedAnnotation) != null) {
-                    if (clazz.isInterface()) {
-                        interfaces.add(clazz);
-                    } else {
-                        instantiable.add(clazz);
+        scannedClasses.stream()
+                .filter(scannedClazz -> ReflectionUtils.hasAnnotation(scannedClazz, Crumb.class))
+                .filter(clazz -> !clazz.isAnnotation() && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers()))
+                .forEach(clazz -> {
+                    try {
+                        Constructor constructor = clazz.getDeclaredConstructor();
+                        constructor.setAccessible(true);
+                        Object instance = constructor.newInstance();
+                        crumbs.put(clazz, instance);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        throw new CrumbsInitException("Error occurred on load or scan for crumbs", e);
                     }
-                }
-            });
-        });
-        return instantiable;
-    }
-
-    private Collection<? extends Class<?>> searchInstantiableAnnotatedInterfaces(List<Class<?>> scannedClasses,
-                                                                                 Set<Class<?>> interfaces) {
-        List<Class<?>> instantiable = new LinkedList<>();
-        interfaces.forEach(iface -> {
-            scannedClasses.forEach(clazz -> {
-                if (iface.isAssignableFrom(clazz) && !clazz.isInterface()) {
-                    instantiable.add(clazz);
-                }
-            });
-        });
-        return instantiable;
+                });
     }
 }

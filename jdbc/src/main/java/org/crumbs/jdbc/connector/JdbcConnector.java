@@ -10,10 +10,8 @@ import java.sql.SQLException;
 @Crumb
 public class JdbcConnector {
 
-    private Logger LOG = Logger.getLogger(JdbcConnector.class);
-
     private static final int CONNECTION_TTL_SECONDS = 300; // 5 minutes idle time
-
+    private Logger LOG = Logger.getLogger(JdbcConnector.class);
     @Property("crumbs.jdbc.driver-class")
     private String driverClass;
     @Property("crumbs.jdbc.url")
@@ -26,9 +24,10 @@ public class JdbcConnector {
     private Integer connectionTTL;
 
     private boolean driverInitialized;
+    private ConnectionHolder connectionHolder = new ConnectionHolder();
 
     private void initDriver() {
-        if(!driverInitialized) {
+        if (!driverInitialized) {
             LOG.debug("Connection settings class {}, url {}, username {}, password {}",
                     driverClass, url, username, password);
             try {
@@ -40,16 +39,14 @@ public class JdbcConnector {
         }
     }
 
-    private ConnectionHolder connectionHolder = new ConnectionHolder();
-
     public AutoCloseableConnection getConnection() throws SQLException {
         initDriver();
         AutoCloseableConnection autoCloseableConnection = connectionHolder.getAutoCloseableConnection();
-        if(autoCloseableConnection == null || autoCloseableConnection.isClosed()) {
+        if (autoCloseableConnection == null || autoCloseableConnection.isClosed()) {
             LOG.debug("Connection not created or expired, creating a new one");
             connectionHolder.setAutoCloseableConnection(
                     new AutoCloseableConnection(DriverManager.getConnection(url, username, password),
-                            connectionTTL != null ? connectionTTL :CONNECTION_TTL_SECONDS));
+                            connectionTTL != null ? connectionTTL : CONNECTION_TTL_SECONDS));
         }
         return connectionHolder.getAutoCloseableConnection();
     }

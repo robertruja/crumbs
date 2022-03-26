@@ -12,6 +12,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Handler {
     String mapping() default "";
+
     HttpMethod method() default HttpMethod.GET;
+
     Mime producesContent() default Mime.APPLICATION_JSON;
 }

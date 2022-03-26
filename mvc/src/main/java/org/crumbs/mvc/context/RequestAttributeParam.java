@@ -17,18 +17,18 @@ public class RequestAttributeParam implements HandlerParam {
     @Override
     public Object value(Request request) {
         String key = value;
-        if(value.equals("")) {
+        if (value.equals("")) {
             key = name;
         }
 
         Object attribute = request.getAttribute(key);
 
-        if(attribute == null && clazz.isPrimitive()) {
+        if (attribute == null && clazz.isPrimitive()) {
             throw new HandlerInvocationException("Can not map null attribute to parameter type: " + clazz.getName());
         }
-        if(attribute != null && !attribute.getClass().equals(clazz)) {
+        if (attribute != null && !attribute.getClass().equals(clazz)) {
             // cover primitive types
-            if(!attribute.getClass().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
+            if (!attribute.getClass().getSimpleName().equalsIgnoreCase(clazz.getSimpleName())) {
                 throw new HandlerInvocationException("Can not map type " + attribute.getClass().getName() +
                         " to parameter type " + clazz.getName());
             }

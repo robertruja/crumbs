@@ -5,25 +5,14 @@ import org.crumbs.core.annotation.CrumbRef;
 import org.crumbs.core.annotation.CrumbsApplication;
 import org.crumbs.core.context.CrumbsApp;
 import org.crumbs.core.context.CrumbsContext;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 @CrumbsApplication
 public class CrumbsWithInterfaceTest {
-
-    @Crumb
-    public static class TestClass {
-
-        @CrumbRef
-        private InterfaceAnnotatedWithPlainCrumb crumb;
-
-        public InterfaceAnnotatedWithPlainCrumb getCrumb() {
-            return crumb;
-        }
-    }
-
 
     @Test
     public void shouldReturnCrumbsWithAnnotationOnInterface() {
@@ -44,5 +33,16 @@ public class CrumbsWithInterfaceTest {
 
         assertNotNull(crumb);
         assertEquals("StereotypeIfaceCrumb", crumb.call());
+    }
+
+    @Crumb
+    public static class TestClass {
+
+        @CrumbRef
+        private InterfaceAnnotatedWithPlainCrumb crumb;
+
+        public InterfaceAnnotatedWithPlainCrumb getCrumb() {
+            return crumb;
+        }
     }
 }

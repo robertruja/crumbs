@@ -23,7 +23,7 @@ public class Logger {
     private <T> Logger(Class<T> clazz) {
         this.clazz = clazz;
         String packageName = clazz.getPackage().getName();
-        if(!packages.isEmpty()) {
+        if (!packages.isEmpty()) {
             active = packageName.startsWith("org.crumbs") || Arrays.stream(packages.split(","))
                     .anyMatch(packageName::startsWith);
         }
@@ -74,7 +74,7 @@ public class Logger {
     }
 
     private void log(Level level, String message, Object... args) {
-        if(!active || level.getOrdinal() <  Logger.level.getOrdinal()) {
+        if (!active || level.getOrdinal() < Logger.level.getOrdinal()) {
             return;
         }
         date.setTime(System.currentTimeMillis());
@@ -88,7 +88,7 @@ public class Logger {
 
     private String formatMessage(String message, Object... args) {
         String formatted = message;
-        for(Object arg: args) {
+        for (Object arg : args) {
             formatted = formatted.replaceFirst("\\{}", Matcher.quoteReplacement(arg.toString()));
         }
         return formatted;

@@ -24,14 +24,6 @@ public class ResponseImpl implements Response {
         exchange.getResponseHeaders().set("Content-Type", mime.getValue());
     }
 
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
-
-    public void setBody(byte[] body) {
-        this.body = body;
-    }
-
     public void addHeader(String key, String value) {
         exchange.getResponseHeaders().set(key, value);
     }
@@ -41,9 +33,17 @@ public class ResponseImpl implements Response {
         return status;
     }
 
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
     @Override
     public byte[] getBody() {
         return body;
+    }
+
+    public void setBody(byte[] body) {
+        this.body = body;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ResponseImpl implements Response {
 
     @Override
     public void flush() {
-        if(!handeled) {
+        if (!handeled) {
             handeled = true;
             try {
                 sendResponseHeaders();
@@ -73,9 +73,9 @@ public class ResponseImpl implements Response {
     }
 
     private void sendResponseHeaders() throws IOException {
-        if(status == null ) {
+        if (status == null) {
             throw new InternalServerErrorException("Status not set on response");
         }
-        exchange.sendResponseHeaders(status.getCode(), status.equals(HttpStatus.NO_CONTENT) ? - 1 : body.length);
+        exchange.sendResponseHeaders(status.getCode(), status.equals(HttpStatus.NO_CONTENT) ? -1 : body.length);
     }
 }
