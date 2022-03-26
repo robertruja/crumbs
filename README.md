@@ -4,3 +4,5 @@ sub-modules:
 * core
 * jdbc
 * mvc
+* client
+* testsupport
