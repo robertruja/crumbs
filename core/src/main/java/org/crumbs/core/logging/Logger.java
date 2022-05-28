@@ -11,12 +11,17 @@ public class Logger {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
     private static final String PATTERN = "%T [%L] %C - %M";
+    private static final int DAYS_BACK_DEFAULT = 30;
 
     private static Level level = Level.valueOf(System.getProperty("log.level", "INFO"));
     private static String packages = System.getProperty("log.packages", "");
+    private static String dirPath = System.getProperty("log.dirPath", "");
+    private static String filePrefix = System.getProperty("log.filePrefix");
+    private static String daysBack = System.getProperty("log.daysBack");
 
     private Class<?> clazz;
     private Date date = new Date();
+    private Writer writer;
 
     private boolean active = true;
 
@@ -26,6 +31,13 @@ public class Logger {
         if (!packages.isEmpty()) {
             active = packageName.startsWith("org.crumbs") || Arrays.stream(packages.split(","))
                     .anyMatch(packageName::startsWith);
+        }
+        if(!dirPath.isEmpty()) {
+            RotatingFileAppender appender = new RotatingFileAppender(dirPath, daysBack != null ?
+                    Integer.parseInt(daysBack) : DAYS_BACK_DEFAULT, filePrefix);
+            writer = message -> appender.appendForDate(date, message);
+        } else {
+            writer = System.out::println;
         }
     }
 
@@ -83,7 +95,7 @@ public class Logger {
         formatted = formatted.replace("%C", clazz.getSimpleName());
         message = formatMessage(message, args);
         formatted = formatted.replace("%M", message);
-        System.out.println(formatted);
+        writer.out(formatted);
     }
 
     private String formatMessage(String message, Object... args) {
@@ -92,5 +104,9 @@ public class Logger {
             formatted = formatted.replaceFirst("\\{}", Matcher.quoteReplacement(arg.toString()));
         }
         return formatted;
+    }
+
+    private interface Writer {
+        void out(String message);
     }
 }
