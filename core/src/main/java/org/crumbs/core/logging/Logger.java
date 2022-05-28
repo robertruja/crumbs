@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 
 public class Logger {
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final String PATTERN = "%T [%L] %C - %M";
     private static final int DAYS_BACK_DEFAULT = 30;
 

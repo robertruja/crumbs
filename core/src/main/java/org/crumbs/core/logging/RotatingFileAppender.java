@@ -23,9 +23,9 @@ public class RotatingFileAppender {
 
     public RotatingFileAppender(String locationDirPath, int daysBack, String logFilePrefix) {
         try {
-            File file = new File(new URI(locationDirPath));
+            File file = new File(new URI("file://" + locationDirPath));
             if(!file.exists()) {
-                file.mkdir();
+                file.mkdirs();
             }
             this.daysBack = daysBack;
             this.dir = file;
@@ -38,15 +38,17 @@ public class RotatingFileAppender {
     public void appendForDate(Date date, String message) {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(rotateAndGet(date), true));
-            writer.newLine();
             writer.write(message);
+            writer.newLine();
+            writer.flush();
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private File rotateAndGet(Date date) {
-        String name = logFilePrefix + FORMAT.format(date) + ".log";
+        String name = logFilePrefix + "." + FORMAT.format(date) + ".log";
         File existing = null;
         File oldest = null;
         long lastModified = 0;
