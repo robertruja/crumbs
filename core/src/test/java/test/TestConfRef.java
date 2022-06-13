@@ -40,4 +40,13 @@ public class TestConfRef {
         assertEquals("prefixsome-test", props.get("test.ref2"));
         assertEquals("test", props.get("non.existent"));
     }
+
+    @Test
+    public void TestConfPropertiesReplace2Values() {
+        Map<String, String> props = ConfigLoader.loadProperties();
+
+        assertEquals("prefixsome-test1_andsometext/some-test2/", props.get("test.ref3"));
+
+    }
+
 }

@@ -50,18 +50,20 @@ public class ConfigLoader {
                 .collect(Collectors.toMap(key -> key, key -> System.getProperty(key, propertyMap.get(key))));
         return replaced.keySet()
                 .stream()
-                .collect(Collectors.toMap(key -> key, propertyKey -> {
-                    String propertyValue = replaced.get(propertyKey);
-                    if (propertyValue.contains("${") &&
-                            propertyValue.substring(propertyValue.indexOf("${")).contains("}")) {
-                        int start = propertyValue.indexOf("${");
-                        int end = propertyValue.indexOf("}");
-                        String prefix = propertyValue.substring(0, start);
-                        String ref = propertyValue.substring(start + 2, end);
-                        String suffix = propertyValue.substring(end + 1);
-                        propertyValue = prefix + replaced.get(ref) + suffix;
-                    }
-                    return propertyValue;
-                }));
+                .collect(Collectors.toMap(key -> key, propertyKey -> replace(replaced.get(propertyKey), replaced)));
+    }
+
+    private static String replace(String propertyValue, Map<String, String> properties) {
+        int lastIndex = 0;
+        while ((lastIndex = propertyValue.indexOf("${")) != -1) {
+            if(propertyValue.substring(lastIndex).contains("}")) {
+                int end = propertyValue.indexOf("}");
+                String prefix = propertyValue.substring(0, lastIndex);
+                String ref = propertyValue.substring(lastIndex + 2, end);
+                String suffix = propertyValue.substring(end + 1);
+                propertyValue = prefix + properties.get(ref) + suffix;
+            }
+        }
+        return propertyValue;
     }
 }
