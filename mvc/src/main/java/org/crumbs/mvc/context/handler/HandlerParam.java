@@ -1,4 +1,4 @@
-package org.crumbs.mvc.context;
+package org.crumbs.mvc.context.handler;
 
 import org.crumbs.mvc.http.Request;
 
