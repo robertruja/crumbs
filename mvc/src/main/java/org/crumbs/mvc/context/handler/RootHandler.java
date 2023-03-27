@@ -45,7 +45,7 @@ public class RootHandler {
                     handler.httpMethod = httpMethod;
                     handler.responseContentType = mime;
                     handler.method = method;
-
+                    handler.path = subPath;
                     handler.paramList = Handler.buildParamList(method);
                     rootHandler.addHandler(subPath, handler);
                 });
@@ -54,7 +54,19 @@ public class RootHandler {
 
 
     void addHandler(String path, Handler handler) {
+        Handler existing = findHandler(path);
+        if(existing != null) {
+            throw new RuntimeException("Conflict: Path " + path + " is already defined with: " + existing.getPath());
+        }
+    }
 
+    public Handler findHandler(String path) {
+        HandlerTreeNode source = pathToNode(path);
+        return findRecursively(source, root);
+    }
+
+    private Handler findRecursively(HandlerTreeNode source, HandlerTreeNode current) {
+        if(source)
     }
 
     private HandlerTreeNode pathToNode(String path) {
@@ -78,10 +90,5 @@ public class RootHandler {
             }
         }
         return parent;
-    }
-
-
-    public Handler findHandler(String subPath) {
-        return null;
     }
 }

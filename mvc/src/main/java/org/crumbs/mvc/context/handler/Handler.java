@@ -1,5 +1,6 @@
 package org.crumbs.mvc.context.handler;
 
+import lombok.Getter;
 import org.crumbs.mvc.annotation.*;
 import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.common.model.Mime;
@@ -20,11 +21,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
+@Getter
 public class Handler {
 
-    private HandlerTreeNode path;
-
+    String path;
     Object handlerRootInstance;
     HttpMethod httpMethod;
     Mime responseContentType;
@@ -97,14 +97,6 @@ public class Handler {
     private Object[] getParameters(Request request) {
         return paramList.stream()
                 .map(param -> param.value(request)).toArray();
-    }
-
-    public HandlerTreeNode getPath() {
-        return path;
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
     }
 
 }
