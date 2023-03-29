@@ -7,9 +7,7 @@ import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.common.model.Mime;
 import org.crumbs.mvc.exception.CrumbsMVCInitException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 
 @Crumb
@@ -31,6 +29,7 @@ public class RootHandler {
             throw new CrumbsMVCInitException("Invalid handler path: " + rootPath + ". Must start with '/'");
         }
         RootHandler rootHandler = new RootHandler();
+        rootHandler.rootPath = rootPath;
         Arrays.stream(clazz.getDeclaredMethods())
                 .filter(method -> method.getAnnotation(org.crumbs.mvc.annotation.Handler.class) != null)
                 .forEach(method -> {
@@ -53,20 +52,63 @@ public class RootHandler {
     }
 
 
-    void addHandler(String path, Handler handler) {
-        Handler existing = findHandler(path);
+    private void addHandler(String path, Handler handler) {
+
+        HandlerTreeNode source = pathToNode(path);
+        PathMatcher matcher = new AbsolutePathMatcher();
+        Handler existing = findRecursively(source, root, matcher);
         if(existing != null) {
             throw new RuntimeException("Conflict: Path " + path + " is already defined with: " + existing.getPath());
         }
+        source.setHandler(handler);
+        addRecursively(source, root, matcher);
     }
 
-    public Handler findHandler(String path) {
+    Handler findHandler(String path) {
         HandlerTreeNode source = pathToNode(path);
-        return findRecursively(source, root);
+        return findRecursively(source, root, new PathVarMatcher());
     }
 
-    private Handler findRecursively(HandlerTreeNode source, HandlerTreeNode current) {
-        if(source)
+    private Handler findRecursively(HandlerTreeNode source, HandlerTreeNode currentExisting, PathMatcher matcher) {
+        if(matcher.matches(source.getPath(), currentExisting.getPath())) {
+            if(!source.hasMoreChildren()) {
+                return currentExisting.getHandler();
+            } else {
+                HandlerTreeNode srcChild = source.getChildren().get(0);
+                Handler result = null;
+                for(HandlerTreeNode existingChildOfCurrent: currentExisting.getChildren()) {
+                    result = findRecursively(srcChild, existingChildOfCurrent, matcher);
+                    if(result != null) {
+                        break;
+                    }
+                }
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private boolean addRecursively(HandlerTreeNode source, HandlerTreeNode currentExisting, PathMatcher matcher) {
+        boolean added = false;
+        if(matcher.matches(source.getPath(), currentExisting.getPath())) {
+            if(source.hasMoreChildren()) {
+                HandlerTreeNode srcChild = source.getChildren().get(0);
+                for(HandlerTreeNode existingChildOfCurrent: currentExisting.getChildren()) {
+                    added = addRecursively(srcChild, existingChildOfCurrent, matcher);
+                    if(added) {
+                        break;
+                    }
+                }
+                if(!added) {
+                    currentExisting.addChild(srcChild);
+                    added = true;
+                }
+            } else {
+                currentExisting.setHandler(source.getHandler());
+                added = true;
+            }
+        }
+        return added;
     }
 
     private HandlerTreeNode pathToNode(String path) {
