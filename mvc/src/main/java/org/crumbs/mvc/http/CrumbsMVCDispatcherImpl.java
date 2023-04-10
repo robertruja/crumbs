@@ -3,6 +3,7 @@ package org.crumbs.mvc.http;
 import org.crumbs.core.annotation.CrumbRef;
 import org.crumbs.core.logging.Logger;
 import org.crumbs.json.JsonMapper;
+import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.common.model.HttpStatus;
 import org.crumbs.mvc.common.model.Mime;
 import org.crumbs.mvc.context.handler.Handler;
@@ -10,6 +11,8 @@ import org.crumbs.mvc.context.handler.HandlerContext;
 import org.crumbs.mvc.context.handler.HandlerInvocationResult;
 import org.crumbs.mvc.exception.*;
 import org.crumbs.mvc.model.ResponseEntity;
+
+import java.util.Map;
 
 
 public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
@@ -32,11 +35,12 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
                 return;
             }
 
-            Handler handler = handlerContext.findHandler(request);
-            if(handler == null) {
+            Map<HttpMethod, Handler> handlerMap = handlerContext.findHandler(request);
+             if(handlerMap == null) {
                 throw new NotFoundException("Could not find mapping for: " + request.getUrlPath());
             }
-            if(!handler.getHttpMethod().equals(request.getMethod())) {
+            Handler handler = handlerMap.get(request.getMethod());
+            if(handler == null) {
                 throw new HttpMethodNotAllowedException("Http method " + request.getMethod() +
                         " not allowed for request " + request.getUrlPath());
             }

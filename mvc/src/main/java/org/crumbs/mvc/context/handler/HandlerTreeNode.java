@@ -1,40 +1,47 @@
 package org.crumbs.mvc.context.handler;
 
-import java.util.LinkedList;
-import java.util.List;
+import org.crumbs.mvc.common.model.HttpMethod;
+import org.crumbs.mvc.exception.ConflictException;
+
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class HandlerTreeNode {
 
-    private List<HandlerTreeNode> children = new LinkedList<>();
-    private Handler handler;
+    private static final Pattern PATH_VAR_PATTERN = Pattern.compile("/\\{[a-zA-Z0-9_\\-]*\\}");
+    private static final Pattern SUB_PATH_PATTERN = Pattern.compile("/[a-zA-Z0-9_\\-]*");
 
-    private String path;
+    private Map<String, HandlerTreeNode> absSubmappings = new HashMap<>();
+    private HandlerTreeNode wildcardSubmapping;
+    private Map<HttpMethod, Handler> handlerMap = new HashMap<>();
 
-    void addChild(HandlerTreeNode child) {
-        children.add(child);
+    public HandlerTreeNode getChild(String currentPath) {
+        HandlerTreeNode child = absSubmappings.get(currentPath);
+        if(child == null) {
+            child = wildcardSubmapping;
+        }
+        return child;
     }
 
-    void setPath(String path) {
-        this.path = path;
+    public Map<HttpMethod, Handler> getHandlers() {
+        return handlerMap;
     }
 
-    public boolean hasMoreChildren() {
-        return children.size() > 0;
+    public void addSubmapping(String path, HandlerTreeNode node) {
+        if(PATH_VAR_PATTERN.matcher(path).matches()) {
+            if(wildcardSubmapping != null) {
+                throw new ConflictException(path + " is conflicting with and already defined path var entry");
+            }
+            wildcardSubmapping = node;
+        }
+        else if(SUB_PATH_PATTERN.matcher(path).matches()) {
+            absSubmappings.put(path, node);
+        } else {
+            throw new IllegalArgumentException("Invalid sub path format: " + path);
+        }
     }
 
-    public Handler getHandler() {
-        return handler;
-    }
-
-    public List<HandlerTreeNode> getChildren() {
-        return children;
-    }
-
-    public void setHandler(Handler handler) {
-        this.handler = handler;
-    }
-
-    public String getPath() {
-        return path;
+    public void putHandler(HttpMethod method, Handler handler) {
+        handlerMap.put(method, handler);
     }
 }

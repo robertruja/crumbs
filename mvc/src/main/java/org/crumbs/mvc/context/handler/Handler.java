@@ -35,10 +35,6 @@ public class Handler {
     Handler() {
     }
 
-    private static HandlerTreeNode fromStringPath(String strPath) {
-        return null; //todo
-    }
-
     static List<HandlerParam> buildParamList(Method method) {
         return Arrays.stream(method.getParameters())
                 .map(parameter -> {
@@ -95,8 +91,20 @@ public class Handler {
     }
 
     private Object[] getParameters(Request request) {
+        setPathVars(request);
         return paramList.stream()
                 .map(param -> param.value(request)).toArray();
     }
 
+    private void setPathVars(Request request) {
+        String[] subMappings = path.substring(1).split("/");
+        String[] subPaths = request.getUrlPath().substring(1).split("/");
+        for (int i = 0; i < subMappings.length; i++) {
+            String subMapping = subMappings[i];
+            String subPath = subPaths[i];
+            if (subMapping.startsWith("{") && subMapping.endsWith("}")) {
+                request.setPathVariable(subMapping.substring(1, subMapping.length() - 1), subPath);
+            }
+        }
+    }
 }
