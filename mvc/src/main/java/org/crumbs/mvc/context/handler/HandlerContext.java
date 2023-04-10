@@ -9,9 +9,6 @@ import org.crumbs.mvc.annotation.HandlerRoot;
 import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.common.model.Mime;
 import org.crumbs.mvc.exception.CrumbsMVCInitException;
-import org.crumbs.mvc.exception.HandlerNotFoundException;
-import org.crumbs.mvc.exception.HttpMethodNotAllowedException;
-import org.crumbs.mvc.exception.NotFoundException;
 import org.crumbs.mvc.http.Request;
 import org.crumbs.mvc.http.Response;
 import org.crumbs.mvc.interceptor.HandlerInterceptor;
@@ -33,8 +30,9 @@ public class HandlerContext {
 
     @CrumbInit
     public void init() {
-        List<?> handlerCrumbs = context.getCrumbsWithAnnotation(HandlerRoot.class);
-        handlerCrumbs.forEach(this::addToTree);
+
+        context.getCrumbsWithAnnotation(HandlerRoot.class)
+                .forEach(this::addToTree);
 
         interceptors = context.getCrumbsWithInterface(HandlerInterceptor.class)
                 .stream()
