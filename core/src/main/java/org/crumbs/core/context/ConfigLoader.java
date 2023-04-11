@@ -56,7 +56,7 @@ public class ConfigLoader {
     private static String replace(String propertyValue, Map<String, String> properties) {
         int lastIndex = 0;
         while ((lastIndex = propertyValue.indexOf("${")) != -1) {
-            if(propertyValue.substring(lastIndex).contains("}")) {
+            if (propertyValue.substring(lastIndex).contains("}")) {
                 int end = propertyValue.indexOf("}");
                 String prefix = propertyValue.substring(0, lastIndex);
                 String ref = propertyValue.substring(lastIndex + 2, end);

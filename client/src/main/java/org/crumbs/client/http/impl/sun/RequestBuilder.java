@@ -17,6 +17,7 @@ public class RequestBuilder {
     private Map<String, List<String>> headers = new HashMap<>();
     private byte[] payload = new byte[0];
     private InputStream payloadInput;
+
     private RequestBuilder() {
     }
 

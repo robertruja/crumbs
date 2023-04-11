@@ -3,7 +3,8 @@ package org.crumbs.mvc.context.handler;
 import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.exception.ConflictException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class HandlerTreeNode {
@@ -17,7 +18,7 @@ public class HandlerTreeNode {
 
     public HandlerTreeNode getChild(String currentPath) {
         HandlerTreeNode child = absSubmappings.get(currentPath);
-        if(child == null) {
+        if (child == null) {
             child = wildcardSubmapping;
         }
         return child;
@@ -28,13 +29,12 @@ public class HandlerTreeNode {
     }
 
     public void addSubmapping(String path, HandlerTreeNode node) {
-        if(PATH_VAR_PATTERN.matcher(path).matches()) {
-            if(wildcardSubmapping != null) {
+        if (PATH_VAR_PATTERN.matcher(path).matches()) {
+            if (wildcardSubmapping != null) {
                 throw new ConflictException(path + " is conflicting with and already defined path var entry");
             }
             wildcardSubmapping = node;
-        }
-        else if(SUB_PATH_PATTERN.matcher(path).matches()) {
+        } else if (SUB_PATH_PATTERN.matcher(path).matches()) {
             absSubmappings.put(path, node);
         } else {
             throw new IllegalArgumentException("Invalid sub path format: " + path);

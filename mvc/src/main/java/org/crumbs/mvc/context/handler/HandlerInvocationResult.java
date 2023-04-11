@@ -7,6 +7,7 @@ public class HandlerInvocationResult {
     private Mime mime;
     private Object content;
     private Class<?> returnType;
+
     public HandlerInvocationResult(Mime mime, Object content, Class<?> returnType) {
         this.mime = mime;
         this.content = content;

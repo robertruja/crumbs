@@ -56,7 +56,7 @@ public class HttpClientImpl implements HttpClient {
     private InputStream determinePaylodByEncoding(HttpResponse<InputStream> response) throws IOException {
         String encoding = response.headers().firstValue("Content-Encoding").orElse("");
         switch (encoding) {
-            case "gzip" :
+            case "gzip":
                 return new GZIPInputStream(response.body());
             case "":
                 return response.body();
@@ -67,8 +67,8 @@ public class HttpClientImpl implements HttpClient {
 
 
     private void setHeaders(HttpRequest.Builder builder, Map<String, List<String>> headers) {
-        for(Map.Entry<String, List<String>> entry: headers.entrySet()) {
-            for(String value: entry.getValue()) {
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            for (String value : entry.getValue()) {
                 builder.header(entry.getKey(), value);
             }
         }

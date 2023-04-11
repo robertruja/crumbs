@@ -30,37 +30,6 @@ public class HttpClientTests {
     private static final String HANDLER_PATH = "/http-client-test";
     private static final String URL = "http://localhost:9009" + HANDLER_PATH;
 
-    @HandlerRoot(HANDLER_PATH)
-    static class TestController {
-
-        @Handler(method = HttpMethod.GET, producesContent = Mime.TEXT_PLAIN)
-        public String handle() {
-            return "success get";
-        }
-
-        @Handler(method = HttpMethod.POST, producesContent = Mime.TEXT_PLAIN)
-        public ResponseEntity<SomeResponsePayload> handlePost(@RequestBody SomeRequestPayload payload) {
-            return ResponseEntity.status(org.crumbs.mvc.common.model.HttpStatus.OK)
-                    .body(new SomeResponsePayload(payload.getAge() + payload.getName()));
-        }
-    }
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    static class SomeRequestPayload {
-        String name;
-        Integer age;
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    static class SomeResponsePayload {
-        String namaAge;
-    }
-
     @Test
     public void shouldSendGetRequest() throws JsonUnmarshalException, JsonMarshalException, IllegalAccessException {
 
@@ -93,6 +62,37 @@ public class HttpClientTests {
         Server server = context.getCrumb(Server.class);
         server.stop();
 
+    }
+
+    @HandlerRoot(HANDLER_PATH)
+    static class TestController {
+
+        @Handler(method = HttpMethod.GET, producesContent = Mime.TEXT_PLAIN)
+        public String handle() {
+            return "success get";
+        }
+
+        @Handler(method = HttpMethod.POST, producesContent = Mime.TEXT_PLAIN)
+        public ResponseEntity<SomeResponsePayload> handlePost(@RequestBody SomeRequestPayload payload) {
+            return ResponseEntity.status(org.crumbs.mvc.common.model.HttpStatus.OK)
+                    .body(new SomeResponsePayload(payload.getAge() + payload.getName()));
+        }
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    static class SomeRequestPayload {
+        String name;
+        Integer age;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    static class SomeResponsePayload {
+        String namaAge;
     }
 
 }

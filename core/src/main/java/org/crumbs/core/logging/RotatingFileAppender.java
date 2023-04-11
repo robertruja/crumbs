@@ -24,7 +24,7 @@ public class RotatingFileAppender {
     public RotatingFileAppender(String locationDirPath, int daysBack, String logFilePrefix) {
         try {
             File file = new File(new URI("file://" + locationDirPath));
-            if(!file.exists()) {
+            if (!file.exists()) {
                 file.mkdirs();
             }
             this.daysBack = daysBack;
@@ -53,20 +53,20 @@ public class RotatingFileAppender {
         File oldest = null;
         long lastModified = 0;
         int count = 0;
-        for(File log: dir.listFiles()) {
-            if(log.getName().equals(name)) {
+        for (File log : dir.listFiles()) {
+            if (log.getName().equals(name)) {
                 existing = log;
             }
-            if(lastModified == 0 || log.lastModified() < lastModified) {
+            if (lastModified == 0 || log.lastModified() < lastModified) {
                 lastModified = log.lastModified();
                 oldest = log;
             }
             count++;
         }
-        if(count > daysBack && oldest != null) {
+        if (count > daysBack && oldest != null) {
             oldest.delete();
         }
-        if(existing == null) {
+        if (existing == null) {
             return new File(dir.getAbsolutePath() + File.separator + name);
         }
         return existing;

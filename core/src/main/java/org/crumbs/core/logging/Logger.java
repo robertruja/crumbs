@@ -32,7 +32,7 @@ public class Logger {
             active = packageName.startsWith("org.crumbs") || Arrays.stream(packages.split(","))
                     .anyMatch(packageName::startsWith);
         }
-        if(!dirPath.isEmpty()) {
+        if (!dirPath.isEmpty()) {
             RotatingFileAppender appender = new RotatingFileAppender(dirPath, daysBack != null ?
                     Integer.parseInt(daysBack) : DAYS_BACK_DEFAULT, filePrefix);
             writer = message -> appender.appendForDate(date, message);

@@ -31,13 +31,11 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
         long start = System.currentTimeMillis();
 
         try {
-            handlerContext.intercept(request, response, (req, resp) -> {
-                try {
-                    handleAfterIntercept(request, response);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
+            if (handlerContext.preHandle(request, response)) {
+                executeHandle(request, response);
+            }
+
+            handlerContext.postHandle(request, response);
         } catch (BadRequestException e) {
             logger.warn(e.getMessage());
             response.setStatus(HttpStatus.BAD_REQUEST);
@@ -97,13 +95,13 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
         logger.debug("Handled request {} {} in {} ms", request.getMethod(), request.getUrlPath(), end);
     }
 
-    private void handleAfterIntercept(Request request, Response response) throws Exception {
+    private void executeHandle(Request request, Response response) throws Exception {
         Map<HttpMethod, Handler> handlerMap = handlerContext.findHandler(request);
-        if(handlerMap == null) {
+        if (handlerMap == null) {
             throw new NotFoundException("Could not find mapping for: " + request.getUrlPath());
         }
         Handler handler = handlerMap.get(request.getMethod());
-        if(handler == null) {
+        if (handler == null) {
             throw new HttpMethodNotAllowedException("Http method " + request.getMethod() +
                     " not allowed for request " + request.getUrlPath());
         }

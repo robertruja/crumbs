@@ -62,7 +62,7 @@ public class CrumbsContext {
                         Property property = field.getAnnotation(Property.class);
                         String propertyKey = property.value();
                         String value = properties.get(propertyKey);
-                        if(value == null) {
+                        if (value == null) {
                             return;
                         }
                         try {

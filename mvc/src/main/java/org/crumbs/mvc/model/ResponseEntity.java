@@ -5,6 +5,7 @@ import org.crumbs.mvc.common.model.HttpStatus;
 public class ResponseEntity<T> {
     private T body;
     private HttpStatus status;
+
     private ResponseEntity(HttpStatus status, T body) {
         this.body = body;
         this.status = status;

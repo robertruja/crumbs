@@ -5,7 +5,6 @@ import org.crumbs.core.context.CrumbsApp;
 import org.crumbs.core.context.CrumbsContext;
 import org.junit.jupiter.api.Test;
 
-
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

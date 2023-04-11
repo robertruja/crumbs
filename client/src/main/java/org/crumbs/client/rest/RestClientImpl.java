@@ -40,7 +40,7 @@ public class RestClientImpl implements RestClient {
         }
 
         Map<String, List<String>> headers = requestEntity.getHeaders();
-        if(headers == null) {
+        if (headers == null) {
             builder.header("Accept", List.of("application/json"));
         } else {
             headers.forEach(builder::header);

@@ -8,7 +8,6 @@ import org.crumbs.client.rest.model.ResponseEntity;
 import org.crumbs.core.annotation.CrumbsApplication;
 import org.crumbs.core.context.CrumbsApp;
 import org.crumbs.core.context.CrumbsContext;
-
 import org.crumbs.mvc.http.impl.sun.Server;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,6 +29,11 @@ public class PathFindTests {
 
         client = context.getCrumbsWithInterface(RestClient.class).get(0);
         server = context.getCrumb(Server.class);
+    }
+
+    @AfterAll
+    public static void destroy() {
+        server.stop();
     }
 
     @Test
@@ -90,10 +94,5 @@ public class PathFindTests {
         String responseBody = response.getBody();
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(result, responseBody);
-    }
-
-    @AfterAll
-    public static void destroy() {
-        server.stop();
     }
 }

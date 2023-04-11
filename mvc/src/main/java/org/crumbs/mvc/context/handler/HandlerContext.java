@@ -17,7 +17,6 @@ import org.crumbs.mvc.security.SecurityInterceptor;
 import org.crumbs.mvc.security.cors.CorsHandlerInterceptor;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Crumb
@@ -48,13 +47,22 @@ public class HandlerContext {
                 .collect(Collectors.toList());
     }
 
-    public void intercept(Request request, Response response, BiConsumer<Request, Response> exchangeHandler) {
+    public boolean preHandle(Request request, Response response) {
         for (HandlerInterceptor interceptor : interceptors) {
-            interceptor.handle(request, response, exchangeHandler);
+            if (!interceptor.preHandle(request, response)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void postHandle(Request request, Response response) {
+        for (HandlerInterceptor interceptor : interceptors) {
+            interceptor.postHandle(request, response);
         }
     }
 
-    public Map<HttpMethod,Handler> findHandler(Request request) {
+    public Map<HttpMethod, Handler> findHandler(Request request) {
         String reqUrlPath = request.getUrlPath();
         List<String> source = subPaths(reqUrlPath);
         return findRecursively(source.iterator(), root);
@@ -95,9 +103,9 @@ public class HandlerContext {
     private void addHandler(String path, HttpMethod method, Handler handler) {
         List<String> split = subPaths(path);
         Map<HttpMethod, Handler> existingByPath = findRecursively(split.iterator(), root);
-        if(existingByPath != null) {
+        if (existingByPath != null) {
             Handler existing = existingByPath.get(method);
-            if(existing != null) {
+            if (existing != null) {
                 throw new RuntimeException("Conflict: Path " + path + " is already defined with: " + existing.getPath());
             }
         }
@@ -105,20 +113,20 @@ public class HandlerContext {
     }
 
     private Map<HttpMethod, Handler> findRecursively(Iterator<String> iterator, HandlerTreeNode treeNode) {
-        if(treeNode == null) {
+        if (treeNode == null) {
             return null;
         }
-        if(iterator.hasNext()) {
+        if (iterator.hasNext()) {
             return findRecursively(iterator, treeNode.getChild(iterator.next()));
         }
         return treeNode.getHandlers();
     }
 
     private void addRecursively(Iterator<String> it, HandlerTreeNode treeNode, HttpMethod method, Handler handler) {
-        if(it.hasNext()) {
+        if (it.hasNext()) {
             String nextChildPath = it.next();
             HandlerTreeNode existingChild = treeNode.getChild(nextChildPath);
-            if(existingChild == null) {
+            if (existingChild == null) {
                 existingChild = new HandlerTreeNode();
                 treeNode.addSubmapping(nextChildPath, existingChild);
             }
@@ -130,17 +138,18 @@ public class HandlerContext {
 
     private List<String> subPaths(String path) {
         List<String> result = new LinkedList<>();
-        if(path.length() > 1 && path.endsWith("/")) {
+        if (path.length() > 1 && path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
-        if(!path.startsWith("/")) {
+        if (!path.startsWith("/")) {
             throw new RuntimeException("The path " + path + " does not start with '/'");
         }
-        if(path.equals("/")) {
+        if (path.equals("/")) {
             return result;
         }
         Arrays.stream(path.substring(1).split("/"))
                 .forEach(subPath -> result.add("/" + subPath));
         return result;
     }
+
 }
