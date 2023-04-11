@@ -24,6 +24,7 @@ public class RequestImpl implements Request {
     private Map<String, List<String>> headers = new HashMap<>();
     private Map<String, String> queryParams = new HashMap<>();
     private Map<String, String> pathVariables = new HashMap<>();
+    private String source;
 
     private RequestImpl() {
     }
@@ -34,6 +35,7 @@ public class RequestImpl implements Request {
         request.exchange = exchange;
         request.method = HttpMethod.valueOf(exchange.getRequestMethod());
         request.urlPath = exchange.getRequestURI().getPath();
+        request.source = exchange.getRemoteAddress().getHostString();
         request.readQuery(exchange.getRequestURI().getQuery());
         request.readHeaders(exchange.getRequestHeaders());
         return request;
@@ -70,6 +72,11 @@ public class RequestImpl implements Request {
     @Override
     public Map<String, List<String>> getHeaders() {
         return Collections.unmodifiableMap(headers);
+    }
+
+    @Override
+    public String getSource() {
+        return source;
     }
 
     private void readQuery(String qs) {

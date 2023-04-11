@@ -33,4 +33,6 @@ public interface Request {
 
     Map<String, List<String>> getHeaders();
 
+    String getSource();
+
 }
