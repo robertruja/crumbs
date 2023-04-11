@@ -52,10 +52,32 @@ public class PathFindTests {
         perform("/tree-test1/first", HttpMethod.DELETE, "OK");
         perform("/tree-test1/first/second", HttpMethod.DELETE, "OK");
         perform("/tree-test1/first/second/test", HttpMethod.DELETE, "first_second_bbb");
-        perform("/tree-test1/first/second/third", HttpMethod.DELETE, "bbb_third");
-        perform("/tree-test1/first/second/third", HttpMethod.PUT, "ccc_third");
+        perform("/tree-test1/first/1234/third", HttpMethod.DELETE, "bbb_third_1234");
+        perform("/tree-test1/first/some/third", HttpMethod.PUT, "ccc_third");
         perform("/tree-test1/first/second/third", HttpMethod.POST, "OK");
 
+    }
+
+    @Test
+    public void shouldReturnNotFound() {
+        ResponseEntity<String> response =
+                client.doRequest(RequestEntity.builder().method(HttpMethod.PUT)
+                                .url(BASE_URL + "/tree-test3/some/123")
+                                .build(),
+                        String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatus());
+    }
+
+    @Test
+    public void shouldReturnMethodNotAllowed() {
+        ResponseEntity<String> response =
+                client.doRequest(RequestEntity.builder().method(HttpMethod.PUT)
+                                .url(BASE_URL + "/tree-test2/first/second/third")
+                                .build(),
+                        String.class);
+
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatus());
     }
 
     private void perform(String path, HttpMethod method, String result) {

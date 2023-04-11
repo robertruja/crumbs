@@ -41,9 +41,9 @@ public class TestMvcHandler {
         return "first_second_bbb";
     }
 
-    @Handler(mapping = "/first/{bbb}/third", method = DELETE)
-    public String firstLevelThirdBBB() {
-        return "bbb_third";
+    @Handler(mapping = "/first/{val}/third", method = DELETE)
+    public String firstLevelThirdBBB(@PathVariable int val) {
+        return "bbb_third_" + val;
     }
 
     @Handler(mapping = "/first/{ccc}/third", method = PUT)
