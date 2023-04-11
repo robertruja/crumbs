@@ -16,6 +16,7 @@ public enum Mime {
     SVG("image/svg+xml"),
     PDF("application/pdf"),
     TEXT_JAVASCRIPT("text/javascript"),
+    DNS_MESSAGE("application/dns-message"),
     ZIP("application/zip");
 
     private String value;
