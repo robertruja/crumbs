@@ -38,7 +38,13 @@ public class RestClientImpl implements RestClient {
                 throw new RestClientException("Unable to serialize request body ", e);
             }
         }
-        builder.header("Accept", List.of("application/json"));
+
+        Map<String, List<String>> headers = requestEntity.getHeaders();
+        if(headers == null) {
+            builder.header("Accept", List.of("application/json"));
+        } else {
+            headers.forEach(builder::header);
+        }
 
         Response response = client.doRequest(builder.build());
 
