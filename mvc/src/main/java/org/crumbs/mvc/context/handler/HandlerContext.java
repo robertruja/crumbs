@@ -17,6 +17,7 @@ import org.crumbs.mvc.security.SecurityInterceptor;
 import org.crumbs.mvc.security.cors.CorsHandlerInterceptor;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Crumb
@@ -47,15 +48,10 @@ public class HandlerContext {
                 .collect(Collectors.toList());
     }
 
-    public boolean intercept(Request request, Response response) {
-        boolean shouldContinue = true;
+    public void intercept(Request request, Response response, BiConsumer<Request, Response> exchangeHandler) {
         for (HandlerInterceptor interceptor : interceptors) {
-            if (!interceptor.handle(request, response)) {
-                shouldContinue = false;
-                break;
-            }
+            interceptor.handle(request, response, exchangeHandler);
         }
-        return shouldContinue;
     }
 
     public Map<HttpMethod,Handler> findHandler(Request request) {

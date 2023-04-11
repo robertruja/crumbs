@@ -6,6 +6,8 @@ import org.crumbs.mvc.http.Request;
 import org.crumbs.mvc.http.Response;
 import org.crumbs.mvc.interceptor.HandlerInterceptor;
 
+import java.util.function.BiConsumer;
+
 public class CorsHandlerInterceptor implements HandlerInterceptor {
 
     private static final String CORS_ALLOW_ORIGIN = "*";
@@ -14,7 +16,7 @@ public class CorsHandlerInterceptor implements HandlerInterceptor {
     private static final String CORS_CACHE_MAX_AGE_SECONDS = "300";
 
     @Override
-    public boolean handle(Request request, Response response) {
+    public void handle(Request request, Response response, BiConsumer<Request, Response> exchangeConsumer) {
         if (request.getMethod().equals(HttpMethod.OPTIONS)) {
             // Javascript's fetch preflight request
             if (request.getHeader("Access-Control-Request-Method") != null &&
@@ -25,13 +27,12 @@ public class CorsHandlerInterceptor implements HandlerInterceptor {
                 response.addHeader("Access-Control-Allow-Headers", CORS_ALLOW_HEADERS);
                 response.addHeader("Access-Control-Max-Age", CORS_CACHE_MAX_AGE_SECONDS);
                 response.setStatus(HttpStatus.OK);
-                return false;
             }
         }
 
         if (request.getHeader("Origin") != null) {
             response.addHeader("Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN);
         }
-        return true;
+        exchangeConsumer.accept(request, response);
     }
 }

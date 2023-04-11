@@ -31,41 +31,13 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
         long start = System.currentTimeMillis();
 
         try {
-            if (!handlerContext.intercept(request, response)) {
-                return;
-            }
-
-            Map<HttpMethod, Handler> handlerMap = handlerContext.findHandler(request);
-             if(handlerMap == null) {
-                throw new NotFoundException("Could not find mapping for: " + request.getUrlPath());
-            }
-            Handler handler = handlerMap.get(request.getMethod());
-            if(handler == null) {
-                throw new HttpMethodNotAllowedException("Http method " + request.getMethod() +
-                        " not allowed for request " + request.getUrlPath());
-            }
-
-            HandlerInvocationResult result = invokeHandler(request, handler);
-
-            HttpStatus status;
-            Object body;
-            if (result.getReturnType().equals(String.class)) {
-                status = HttpStatus.OK;
-                body = result.getContent();
-            } else if (result.getReturnType().equals(ResponseEntity.class)) {
-                ResponseEntity<?> responseEntity = (ResponseEntity<?>) result.getContent();
-                status = responseEntity.getStatus();
-                body = jsonMapper.marshal(responseEntity.getBody());
-            } else if (result.getReturnType() == null) {
-                status = HttpStatus.NO_CONTENT;
-                body = null;
-            } else {
-                throw new Exception("Return type not supported");
-            }
-
-            response.setStatus(status);
-            response.setMime(result.getMime());
-            response.setBody(body == null ? new byte[]{} : body.toString().getBytes());
+            handlerContext.intercept(request, response, (req, resp) -> {
+                try {
+                    handleAfterIntercept(request, response);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
         } catch (BadRequestException e) {
             logger.warn(e.getMessage());
             response.setStatus(HttpStatus.BAD_REQUEST);
@@ -123,6 +95,40 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
         }
         long end = System.currentTimeMillis() - start;
         logger.debug("Handled request {} {} in {} ms", request.getMethod(), request.getUrlPath(), end);
+    }
+
+    private void handleAfterIntercept(Request request, Response response) throws Exception {
+        Map<HttpMethod, Handler> handlerMap = handlerContext.findHandler(request);
+        if(handlerMap == null) {
+            throw new NotFoundException("Could not find mapping for: " + request.getUrlPath());
+        }
+        Handler handler = handlerMap.get(request.getMethod());
+        if(handler == null) {
+            throw new HttpMethodNotAllowedException("Http method " + request.getMethod() +
+                    " not allowed for request " + request.getUrlPath());
+        }
+
+        HandlerInvocationResult result = invokeHandler(request, handler);
+
+        HttpStatus status;
+        Object body;
+        if (result.getReturnType().equals(String.class)) {
+            status = HttpStatus.OK;
+            body = result.getContent();
+        } else if (result.getReturnType().equals(ResponseEntity.class)) {
+            ResponseEntity<?> responseEntity = (ResponseEntity<?>) result.getContent();
+            status = responseEntity.getStatus();
+            body = jsonMapper.marshal(responseEntity.getBody());
+        } else if (result.getReturnType() == null) {
+            status = HttpStatus.NO_CONTENT;
+            body = null;
+        } else {
+            throw new Exception("Return type not supported");
+        }
+
+        response.setStatus(status);
+        response.setMime(result.getMime());
+        response.setBody(body == null ? new byte[]{} : body.toString().getBytes());
     }
 
 
