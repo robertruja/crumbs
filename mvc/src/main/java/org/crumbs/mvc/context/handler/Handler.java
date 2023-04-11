@@ -1,9 +1,13 @@
-package org.crumbs.mvc.context;
+package org.crumbs.mvc.context.handler;
 
-import org.crumbs.mvc.annotation.RequestParam;
+import lombok.Getter;
 import org.crumbs.mvc.annotation.*;
 import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.common.model.Mime;
+import org.crumbs.mvc.context.HeaderParam;
+import org.crumbs.mvc.context.PathVariableParam;
+import org.crumbs.mvc.context.RequestAttributeParam;
+import org.crumbs.mvc.context.RequestBodyParam;
 import org.crumbs.mvc.exception.CrumbsMVCInitException;
 import org.crumbs.mvc.exception.HandlerInvocationException;
 import org.crumbs.mvc.http.Request;
@@ -17,54 +21,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Getter
 public class Handler {
 
-    private String uri;
-    private Object handlerRootInstance;
-    private HttpMethod httpMethod;
-    private Mime responseContentType;
+    String path;
+    Object handlerRootInstance;
+    HttpMethod httpMethod;
+    Mime responseContentType;
 
-    private Method method;
-    private List<HandlerParam> paramList;
+    Method method;
+    List<HandlerParam> paramList;
 
-    private Handler() {
+    Handler() {
     }
 
-    public static List<Handler> fromObject(Object handlerCrumb) {
-        List<Handler> handlers = new ArrayList<>();
-        Class<?> clazz = handlerCrumb.getClass();
-
-        String rootPath = clazz.getAnnotation(HandlerRoot.class).value();
-
-        if (!rootPath.startsWith("/")) {
-            throw new CrumbsMVCInitException("Invalid handler path: " + rootPath + ". Must start with '/'");
-        }
-
-        Arrays.stream(clazz.getDeclaredMethods())
-                .filter(method -> method.getAnnotation(org.crumbs.mvc.annotation.Handler.class) != null)
-                .forEach(method -> {
-                    org.crumbs.mvc.annotation.Handler annotation =
-                            method.getAnnotation(org.crumbs.mvc.annotation.Handler.class);
-
-                    String subPath = annotation.mapping();
-                    HttpMethod httpMethod = annotation.method();
-                    Mime mime = annotation.producesContent();
-                    Handler handler = new Handler();
-                    handler.handlerRootInstance = handlerCrumb;
-                    handler.httpMethod = httpMethod;
-                    handler.responseContentType = mime;
-                    handler.method = method;
-                    handler.uri = rootPath + subPath;
-                    if (rootPath.equals("/")) {
-                        handler.uri = subPath;
-                    }
-                    handler.paramList = buildParamList(method);
-                    handlers.add(handler);
-                });
-        return handlers;
-    }
-
-    private static List<HandlerParam> buildParamList(Method method) {
+    static List<HandlerParam> buildParamList(Method method) {
         return Arrays.stream(method.getParameters())
                 .map(parameter -> {
                     Annotation annotation = parameter.getAnnotation(RequestBody.class);
@@ -114,22 +85,26 @@ public class Handler {
             if (cause instanceof Error) {
                 throw new HandlerInvocationException("Handler invocation threw error", e);
             } else {
-                Exception exception = (Exception) e.getCause();
-                throw exception;
+                throw (Exception) e.getCause();
             }
         }
     }
 
     private Object[] getParameters(Request request) {
+        setPathVars(request);
         return paramList.stream()
                 .map(param -> param.value(request)).toArray();
     }
 
-    public String getURI() {
-        return uri;
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    private void setPathVars(Request request) {
+        String[] subMappings = path.substring(1).split("/");
+        String[] subPaths = request.getUrlPath().substring(1).split("/");
+        for (int i = 0; i < subMappings.length; i++) {
+            String subMapping = subMappings[i];
+            String subPath = subPaths[i];
+            if (subMapping.startsWith("{") && subMapping.endsWith("}")) {
+                request.setPathVariable(subMapping.substring(1, subMapping.length() - 1), subPath);
+            }
+        }
     }
 }

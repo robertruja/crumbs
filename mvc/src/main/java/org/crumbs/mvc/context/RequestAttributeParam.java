@@ -1,5 +1,6 @@
 package org.crumbs.mvc.context;
 
+import org.crumbs.mvc.context.handler.HandlerParam;
 import org.crumbs.mvc.exception.HandlerInvocationException;
 import org.crumbs.mvc.http.Request;
 

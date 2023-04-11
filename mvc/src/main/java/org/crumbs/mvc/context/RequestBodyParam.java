@@ -2,6 +2,7 @@ package org.crumbs.mvc.context;
 
 import org.crumbs.json.JsonMapper;
 import org.crumbs.json.exception.JsonUnmarshalException;
+import org.crumbs.mvc.context.handler.HandlerParam;
 import org.crumbs.mvc.exception.BadRequestException;
 import org.crumbs.mvc.http.Request;
 

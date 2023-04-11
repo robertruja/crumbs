@@ -8,22 +8,27 @@ import org.crumbs.mvc.annotation.PathVariable;
 import static org.crumbs.mvc.common.model.HttpMethod.*;
 
 
-@HandlerRoot("/tree-test1")
-public class TestMvcHandler {
+@HandlerRoot("/tree-test2")
+public class TestMvcHandler2 {
 
     @Handler(method = PUT)
     public String firstLevel() {
-        return "OK";
+        return "put";
     }
 
     @Handler(method = GET)
     public String firstLevelGET() {
-        return "OK";
+        return "get";
     }
 
     @Handler(mapping = "/{aaa}", method = PUT)
-    public String firstLevel(@PathVariable("aaa") String aaa) {
-        return aaa;
+    public String firstLevelPut(@PathVariable String aaa) {
+        return "put_" + aaa;
+    }
+
+    @Handler(mapping = "/{bbb}", method = POST)
+    public String firstLevelPost(@PathVariable("bbb") String aaa) {
+        return "post_" + aaa;
     }
 
     @Handler(mapping = "/first", method = DELETE)
@@ -33,7 +38,7 @@ public class TestMvcHandler {
 
     @Handler(mapping = "/first/second", method = DELETE)
     public String firstLevelSecond() {
-        return "OK";
+        return "first_second";
     }
 
     @Handler(mapping = "/first/second/{bbb}", method = DELETE)
@@ -41,9 +46,9 @@ public class TestMvcHandler {
         return "first_second_bbb";
     }
 
-    @Handler(mapping = "/first/{val}/third", method = DELETE)
-    public String firstLevelThirdBBB(@PathVariable int val) {
-        return "bbb_third_" + val;
+    @Handler(mapping = "/first/{bbb}/third", method = DELETE)
+    public String firstLevelThirdBBB() {
+        return "bbb_third";
     }
 
     @Handler(mapping = "/first/{ccc}/third", method = PUT)
@@ -53,7 +58,7 @@ public class TestMvcHandler {
 
     @Handler(mapping = "/first/second/third", method = POST)
     public String firstLevelSecondThird() {
-        return "OK";
+        return "firstsecondthird";
     }
 
 }

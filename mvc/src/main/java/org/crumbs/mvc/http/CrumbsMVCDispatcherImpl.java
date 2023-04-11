@@ -3,12 +3,17 @@ package org.crumbs.mvc.http;
 import org.crumbs.core.annotation.CrumbRef;
 import org.crumbs.core.logging.Logger;
 import org.crumbs.json.JsonMapper;
+import org.crumbs.mvc.common.model.HttpMethod;
 import org.crumbs.mvc.common.model.HttpStatus;
 import org.crumbs.mvc.common.model.Mime;
-import org.crumbs.mvc.context.HandlerContext;
-import org.crumbs.mvc.context.HandlerInvocationResult;
+import org.crumbs.mvc.context.handler.Handler;
+import org.crumbs.mvc.context.handler.HandlerContext;
+import org.crumbs.mvc.context.handler.HandlerInvocationResult;
 import org.crumbs.mvc.exception.*;
 import org.crumbs.mvc.model.ResponseEntity;
+
+import java.util.Map;
+
 
 public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
 
@@ -29,7 +34,18 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
             if (!handlerContext.intercept(request, response)) {
                 return;
             }
-            HandlerInvocationResult result = handlerContext.invokeHandler(request);
+
+            Map<HttpMethod, Handler> handlerMap = handlerContext.findHandler(request);
+             if(handlerMap == null) {
+                throw new NotFoundException("Could not find mapping for: " + request.getUrlPath());
+            }
+            Handler handler = handlerMap.get(request.getMethod());
+            if(handler == null) {
+                throw new HttpMethodNotAllowedException("Http method " + request.getMethod() +
+                        " not allowed for request " + request.getUrlPath());
+            }
+
+            HandlerInvocationResult result = invokeHandler(request, handler);
 
             HttpStatus status;
             Object body;
@@ -106,6 +122,11 @@ public class CrumbsMVCDispatcherImpl implements CrumbsMVCDispatcher {
 
         }
         long end = System.currentTimeMillis() - start;
-        logger.debug("Handeled request {} {} in {} ms", request.getMethod(), request.getUrlPath(), end);
+        logger.debug("Handled request {} {} in {} ms", request.getMethod(), request.getUrlPath(), end);
+    }
+
+
+    private HandlerInvocationResult invokeHandler(Request request, Handler handler) throws Exception {
+        return handler.invoke(request);
     }
 }
