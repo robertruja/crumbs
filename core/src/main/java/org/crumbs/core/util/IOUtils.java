@@ -11,33 +11,26 @@ public class IOUtils {
 
     public static byte[] readInputStream(InputStream is) {
         try {
-            int max_read = 1024;
-            int totalRead = 0;
+            int buffLen = 1024;
+            byte[] buff = new byte[buffLen];
+            byte[] res = new byte[buffLen];
 
-            byte[] buffer = new byte[2 * max_read];
+            int size = 0;
+            int read = 0;
             int offset = 0;
 
-            while (true) {
-                int read = is.read(buffer, offset, max_read);
-                totalRead += read;
-                offset = offset + max_read;
-                if (read == max_read) {
-                    if (offset == buffer.length) {
-                        // ensure capacity
-                        byte[] doubleBuffer = new byte[buffer.length * 2];
-                        for (int i = 0; i < buffer.length; i++) {
-                            doubleBuffer[i] = buffer[i];
-                        }
-                        buffer = doubleBuffer;
-                    }
-                } else {
-                    byte[] result = new byte[totalRead];
-                    for (int i = 0; i < totalRead; i++) {
-                        result[i] = buffer[i];
-                    }
-                    return result;
+            while(read > -1) {
+                read = is.read(buff, 0, buff.length);
+                size = size + read;
+                if(size > res.length) {
+                    byte[] tmp = new byte[size];
+                    System.arraycopy(tmp, 0, res, 0, res.length);
+                    res = tmp;
                 }
+                if (read >= 0) System.arraycopy(buff, 0, res, offset, read);
+                offset = offset + read;
             }
+            return res;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
