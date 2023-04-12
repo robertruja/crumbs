@@ -33,7 +33,13 @@ public class RestClientImpl implements RestClient {
 
         if (requestBody != null) {
             try {
-                builder.payload(jsonMapper.marshal(requestBody).getBytes());
+                if(requestBody instanceof String) {
+                    builder.payload(((String) requestBody).getBytes());
+                } else if (requestBody instanceof byte[]) {
+                    builder.payload((byte[])requestBody);
+                } else {
+                    builder.payload(jsonMapper.marshal(requestBody).getBytes());
+                }
             } catch (JsonMarshalException | IllegalAccessException e) {
                 throw new RestClientException("Unable to serialize request body ", e);
             }
