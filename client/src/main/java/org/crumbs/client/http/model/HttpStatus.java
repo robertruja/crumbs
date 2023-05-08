@@ -21,9 +21,12 @@ public enum HttpStatus {
     NOT_ACCEPTABLE(406),
     REQUEST_TIMEOUT(408),
     CONFLICT(409),
+    CONTENT_TOO_LARGE(413),
+    UNSUPPORTED_MEDIA_TYPE(415),
     INTERNAL_SERVER_ERROR(500),
     BAD_GATEWAY(502),
-    SERVICE_UNAVAILABLE(503);
+    SERVICE_UNAVAILABLE(503),
+    GATEWAY_TIMEOUT(504);
 
     private static Map<Integer, HttpStatus> codes = Arrays.stream(HttpStatus.values()).collect(Collectors.toMap(
             HttpStatus::getCode, httpStatus -> httpStatus
