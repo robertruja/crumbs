@@ -2,7 +2,7 @@ package org.crumbs.testsupport;
 
 import org.crumbs.core.context.CrumbsApp;
 import org.crumbs.core.context.CrumbsContext;
-import org.crumbs.mvc.http.impl.sun.Server;
+import org.crumbs.http.mvc.http.impl.sun.Server;
 import org.crumbs.testsupport.exception.CrumbsJunitExtensionException;
 import org.crumbs.testsupport.mvc.MvcTest;
 import org.junit.jupiter.api.extension.ExtensionContext;

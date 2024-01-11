@@ -1,10 +1,10 @@
 package org.crumbs.testsupport.mvc;
 
-import org.crumbs.client.http.model.HttpMethod;
-import org.crumbs.client.http.model.HttpStatus;
-import org.crumbs.client.rest.RestClient;
-import org.crumbs.client.rest.model.RequestEntity;
-import org.crumbs.client.rest.model.ResponseEntity;
+import org.crumbs.http.client.http.model.HttpMethod;
+import org.crumbs.http.client.http.model.HttpStatus;
+import org.crumbs.http.client.rest.RestClient;
+import org.crumbs.http.client.rest.model.RequestEntity;
+import org.crumbs.http.client.rest.model.ResponseEntity;
 import org.crumbs.core.annotation.CrumbRef;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

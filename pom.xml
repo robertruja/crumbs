@@ -6,12 +6,11 @@
 
     <groupId>org.crumbs</groupId>
     <artifactId>crumbs-parent</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.0</version>
     <modules>
         <module>core</module>
         <module>jdbc</module>
         <module>mvc</module>
-        <module>client</module>
         <module>testsupport</module>
     </modules>
     <packaging>pom</packaging>
